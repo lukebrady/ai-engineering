@@ -1,2 +1,2 @@
 # ai-engineering
-Learning AI Engineering in the open
+Learning AI engineering in the open
