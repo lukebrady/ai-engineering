@@ -2,11 +2,13 @@ from pydantic import BaseModel, Field
 from langchain_core.tools import tool
 from langchain_tavily import TavilySearch
 
+from utils import get_env
+
 class SearchRequest(BaseModel):
     query: str = Field(description="The query to search for")
 
 @tool
-def search(request: SearchRequest):
+def web_search(request: SearchRequest):
     """
     Search the web for information if you determine that the user's query is not in your knowledge base.
     """
@@ -15,20 +17,13 @@ def search(request: SearchRequest):
     search_docs = search.invoke(request.query)
     return search_docs
 
-# Generate the JSON tool schemas
-search_schema = SearchRequest.model_json_schema()
-
-# Define the available tool definitions
-tool_definitions = [
-    {
-        "type": "function",
-        "function": {
-            "name": "search",
-            "description": "Search the web for information",
-            "parameters": search_schema,
-        },
-    }
-]
-
 # Tools to be used by LangChain
-tools = [search]
+tools = {
+    "web_search": web_search
+}
+
+def get_tools():
+    return list(tools.values())
+
+if __name__ == "__main__":
+    print(get_tools())
