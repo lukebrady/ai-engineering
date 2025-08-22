@@ -1,0 +1,36 @@
+# Example terraform.tfvars file for AI Inference Server
+# Copy this file to terraform.tfvars and fill in your values
+
+# AWS Configuration
+aws_region = "us-east-1"
+environment = "dev"
+
+# AMI Configuration
+ami_name_prefix = "ubuntu-24.04-ai-inference"
+
+# Network Configuration
+# Uses default VPC and one of its subnets automatically; no VPC/subnet variables needed.
+
+# Instance Configuration
+instance_type = "g5.2xlarge"  # L4 equivalent (8 vCPU, 32 GB RAM, 1 L4 GPU)
+key_pair_name = "your-key-pair-name"
+
+# Storage Configuration
+root_volume_size = 100
+
+# Additional volumes (optional)
+additional_volumes = [
+  {
+    device_name = "/dev/sdf"
+    volume_type = "gp3"
+    volume_size = 500
+  }
+]
+
+# Security Configuration
+additional_ports = [8000, 8080, 8888]  # Common AI inference ports
+create_eip = true
+
+# Protection Settings
+disable_api_termination = false
+prevent_destroy = false
