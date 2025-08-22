@@ -176,6 +176,105 @@ Tool (create_file): Successfully created file: hello.txt
 Assistant: I've successfully created the file 'hello.txt' with the content 'Hello, World!'.
 ```
 
+## Testing
+
+This project includes a comprehensive test suite using pytest with excellent coverage and best practices.
+
+### Test Structure
+
+```
+tests/
+├── __init__.py          # Test package initialization
+├── conftest.py          # Pytest fixtures and configuration
+├── test_utils.py        # Unit tests for utils.py
+├── test_tools.py        # Unit tests for all tools
+└── test_main.py         # Integration tests for agent workflow
+```
+
+### Running Tests
+
+#### Quick Start
+```bash
+# Run all tests
+uv run pytest
+
+# Run tests with coverage
+uv run pytest --cov=. --cov-report=term-missing
+
+# Run tests in verbose mode
+uv run pytest -v
+```
+
+#### Using the Test Runner Script
+```bash
+# Basic test run
+python run_tests.py
+
+# Run with coverage and HTML report
+python run_tests.py --coverage --html
+
+# Run in verbose mode with parallel execution
+python run_tests.py --verbose --fast
+
+# Run only unit tests
+python run_tests.py --unit --verbose
+```
+
+### Test Categories
+
+- **Unit Tests**: Test individual functions and components in isolation
+  - `test_utils.py`: Tests for environment variable handling
+  - `test_tools.py`: Tests for all file operations and web search tools
+- **Integration Tests**: Test the complete agent workflow
+  - `test_main.py`: Tests for agent creation, conversation flow, and error handling
+
+### Test Features
+
+- **Comprehensive Coverage**: 84%+ test coverage across all modules
+- **Mocking**: Extensive use of mocks for external dependencies (OpenAI, Tavily, file system)
+- **Fixtures**: Reusable test fixtures for temporary files, mock objects, and test data
+- **Error Testing**: Tests for error conditions, edge cases, and exception handling
+- **Parallel Execution**: Support for running tests in parallel for faster feedback
+
+### Test Configuration
+
+The test configuration is defined in `pyproject.toml`:
+- Automatic test discovery
+- Coverage reporting with HTML output
+- Test markers for categorization
+- Exclusion of test files from coverage
+
+### Continuous Integration
+
+Tests are designed to run in CI environments with:
+- No external API dependencies (all mocked)
+- Temporary file handling for isolation
+- Deterministic behavior
+- Fast execution times
+
 ## Contributing
 
 Feel free to extend this agent with additional tools and capabilities. The modular design makes it easy to add new functionality while maintaining the existing workflow structure.
+
+### Adding Tests for New Features
+
+When adding new tools or functionality:
+
+1. **Unit Tests**: Add tests in the appropriate test file (`test_tools.py` for new tools)
+2. **Integration Tests**: Update `test_main.py` if the change affects agent workflow
+3. **Fixtures**: Add new fixtures to `conftest.py` if needed
+4. **Coverage**: Ensure new code maintains high test coverage
+
+Example test structure for a new tool:
+```python
+class TestNewTool:
+    """Test cases for new_tool."""
+    
+    def test_new_tool_success(self, temp_dir):
+        """Test successful operation."""
+        # Test implementation
+        
+    def test_new_tool_error_handling(self):
+        """Test error conditions."""
+        # Test implementation
+```
