@@ -1,5 +1,4 @@
-# Makefile for AI Engineering Project
-# Provides easy commands for building and managing Packer AMIs
+# Makefile for AI Engineering
 
 # Configuration
 PACKER_DIR := infrastructure/ai-inference/packer
@@ -21,15 +20,24 @@ NC := \033[0m # No Color
 # Help target (default)
 .PHONY: help
 help: ## Show this help message
-	@echo "$(BLUE)AI Engineering Project - Packer AMI Builder$(NC)"
+	@echo "$(BLUE)AI Engineering - Executable Tool Catalog$(NC)"
 	@echo ""
-	@echo "$(YELLOW)Available commands:$(NC)"
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  $(GREEN)%-20s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo "$(YELLOW)AMI/Packer Commands:$(NC)"
+	@awk 'BEGIN {FS = ":.*?## "} /^ami-|^test-provision-script:.*?## / {printf "  $(GREEN)%-25s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 	@echo ""
-	@echo "$(YELLOW)Environment variables:$(NC)"
-	@echo "  AWS_REGION         AWS region for building (default: us-east-1)"
-	@echo "  INSTANCE_TYPE      EC2 instance type for building (default: t3.medium)"
-	@echo "  AMI_NAME_PREFIX    Prefix for AMI names (default: ubuntu-24.04-ai-inference)"
+	@echo "$(YELLOW)Infrastructure/OpenTofu Commands:$(NC)"
+	@awk 'BEGIN {FS = ":.*?## "} /^tofu-.*:.*?## / {printf "  $(GREEN)%-25s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
+	@echo ""
+	@echo "$(YELLOW)Setup & Verification Commands:$(NC)"
+	@awk 'BEGIN {FS = ":.*?## "} /^check-|^install-|^setup:.*?## / {printf "  $(GREEN)%-25s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
+	@echo ""
+	@echo "$(YELLOW)Utility Commands:$(NC)"
+	@awk 'BEGIN {FS = ":.*?## "} /^clean|^distclean|^help|^list-|^status:.*?## / {printf "  $(GREEN)%-25s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
+	@echo ""
+	@echo "$(YELLOW)Environment Variables:$(NC)"
+	@echo "  $(GREEN)AWS_REGION$(NC)         AWS region for building (default: us-east-1)"
+	@echo "  $(GREEN)INSTANCE_TYPE$(NC)      EC2 instance type for building (default: t3.medium)"
+	@echo "  $(GREEN)AMI_NAME_PREFIX$(NC)    Prefix for AMI names (default: ubuntu-24.04-ai-inference)"
 	@echo ""
 	@echo "$(YELLOW)Examples:$(NC)"
 	@echo "  make ami-build                           # Build AMI with defaults"
