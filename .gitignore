@@ -18,6 +18,9 @@ build.log
 *.tmp
 *.temp
 
+# Secrets
+.env.secure
+
 # AWS credentials (if accidentally committed)
 .aws/
 credentials

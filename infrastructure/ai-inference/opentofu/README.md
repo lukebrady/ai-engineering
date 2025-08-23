@@ -5,6 +5,7 @@ This directory contains OpenTofu (formerly Terraform) configuration to deploy an
 ## Overview
 
 The configuration creates:
+
 - **EC2 Instance**: L4 GPU instance (g5.2xlarge) using your custom AMI
 - **Security Group**: Configured for SSH, HTTP, HTTPS, and custom AI inference ports
 - **EBS Volumes**: Root volume + additional data volumes
@@ -14,6 +15,7 @@ The configuration creates:
 ## Prerequisites
 
 1. **OpenTofu**: Install OpenTofu 1.0 or later
+
    ```bash
    # macOS
    brew install opentofu
@@ -23,15 +25,17 @@ The configuration creates:
    echo "deb [signed-by=/usr/share/keyrings/opentofu-archive-keyring.gpg] https://apt.releases.opentofu.org $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/opentofu.list
    sudo apt update && sudo apt install opentofu
    ```
-   
+
    **Note**: The command is `tofu` (not `opentofu`)
 
 2. **AWS CLI**: Configure with appropriate credentials
+
    ```bash
    aws configure
    ```
 
 3. **Custom AMI**: Build the Ubuntu 24.04 AI Inference AMI first
+
    ```bash
    cd ../../ai-inference/packer
    make ami-build
@@ -58,16 +62,19 @@ Networking uses the default VPC and one of its subnets automatically; no VPC/sub
 ## Quick Start
 
 1. **Copy the example configuration**:
+
    ```bash
    cp terraform.tfvars.example terraform.tfvars
    ```
 
 2. **Edit terraform.tfvars** with your values:
+
    ```bash
    vim terraform.tfvars
    ```
 
 3. **Use the Makefile commands**:
+
    ```bash
    # Initialize OpenTofu
    make tofu-init
@@ -84,18 +91,21 @@ Networking uses the default VPC and one of its subnets automatically; no VPC/sub
 The project includes a comprehensive Makefile with OpenTofu commands:
 
 ### **Core Commands**
+
 - `make tofu-init` - Initialize OpenTofu
 - `make tofu-plan` - Show deployment plan
 - `make tofu-apply` - Deploy infrastructure
 - `make tofu-destroy` - Destroy infrastructure
 
 ### **Utility Commands**
+
 - `make tofu-validate` - Validate configuration
 - `make tofu-fmt` - Format configuration files
 - `make tofu-output` - Show outputs
 - `make tofu-refresh` - Refresh state
 
 ### **Advanced Commands**
+
 - `make tofu-plan-destroy` - Plan destruction
 - `make tofu-import` - Import existing resources
 - `make tofu-state` - Manage state
@@ -104,12 +114,14 @@ The project includes a comprehensive Makefile with OpenTofu commands:
 ## Instance Types
 
 ### **L4 GPU Equivalents**
+
 - `g5.2xlarge`: 8 vCPU, 32 GB RAM, 1 L4 GPU (default)
 - `g5.4xlarge`: 16 vCPU, 64 GB RAM, 1 L4 GPU
 - `g5.8xlarge`: 32 vCPU, 128 GB RAM, 1 L4 GPU
 - `g5.12xlarge`: 48 vCPU, 192 GB RAM, 4 L4 GPUs
 
 ### **Other GPU Options**
+
 - `g4dn.xlarge`: 4 vCPU, 16 GB RAM, 1 T4 GPU
 - `p3.2xlarge`: 8 vCPU, 61 GB RAM, 1 V100 GPU
 - `p4d.24xlarge`: 96 vCPU, 1152 GB RAM, 8 A100 GPUs
@@ -125,6 +137,7 @@ The project includes a comprehensive Makefile with OpenTofu commands:
 ## Monitoring & Health Checks
 
 The instance includes:
+
 - **Health Check Script**: `/opt/ai-inference/health-check.sh`
 - **Systemd Timer**: Runs health checks every 5 minutes
 - **Nginx Health Endpoint**: `http://<ip>/health`
@@ -183,6 +196,7 @@ Once deployed:
 ## Support
 
 For issues:
+
 1. Check OpenTofu documentation
 2. Verify AWS credentials and permissions
 3. Ensure all required variables are set
