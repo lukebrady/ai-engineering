@@ -204,7 +204,3 @@ EOF
 aws s3 cp --recursive s3://ec2-linux-nvidia-drivers/latest/ .
 chmod +x NVIDIA-Linux-x86_64*.run
 /bin/sh ./NVIDIA-Linux-x86_64*.run
-
-uv venv --python 3.12 --seed
-source .venv/bin/activate
-uv pip install vllm --torch-backend=auto

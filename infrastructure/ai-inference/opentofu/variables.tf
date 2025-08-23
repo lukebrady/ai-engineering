@@ -22,7 +22,7 @@ variable "ami_name_prefix" {
 variable "instance_type" {
   description = "EC2 instance type for the AI inference server"
   type        = string
-  default     = "g6.2xlarge" # L4 equivalent (8 vCPU, 32 GB RAM, 1 L4 GPU)
+  default     = "g6.xlarge"
 }
 
 
@@ -83,4 +83,11 @@ variable "prevent_destroy" {
   description = "Whether to prevent accidental destruction of the instance"
   type        = bool
   default     = false
+}
+
+# Can be passed in via TF_VAR_hugging_face_token=<token>
+variable "hugging_face_token" {
+  description = "Hugging Face token"
+  type        = string
+  sensitive   = true
 }
