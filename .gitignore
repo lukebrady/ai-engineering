@@ -38,11 +38,17 @@ Thumbs.db
 *.swo
 *~
 
-# Terraform files (if using Terraform later)
+# Terraform/OpenTofu files
 *.tfstate
 *.tfstate.*
 .terraform/
 .terraform.lock.hcl
+secure.tfvars
+
+# Generated SSH keys (contains private keys)
+*.pem
+*.key
+ai-inference-key-*
 
 # Local Packer variables (for environment-specific customizations)
 local.pkr.hcl

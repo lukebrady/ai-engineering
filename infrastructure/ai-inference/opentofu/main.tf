@@ -9,6 +9,14 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.0"
+    }
   }
 }
 
@@ -23,6 +31,73 @@ provider "aws" {
       ManagedBy   = "opentofu"
       Purpose     = "ai-inference-server"
     }
+  }
+}
+
+# Generate SSH key pair locally
+resource "tls_private_key" "ai_inference_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+# Create AWS key pair from the generated public key
+resource "aws_key_pair" "ai_inference_key" {
+  key_name   = "ai-inference-key-${var.environment}"
+  public_key = tls_private_key.ai_inference_key.public_key_openssh
+
+  tags = {
+    Name = "ai-inference-key-${var.environment}"
+  }
+}
+
+# Save private key to local file (for local development only)
+resource "local_file" "private_key" {
+  content         = tls_private_key.ai_inference_key.private_key_pem
+  filename        = "${path.module}/ai-inference-key-${var.environment}.pem"
+  file_permission = "0600"
+}
+
+# IAM role for EC2 instance with SSM access
+resource "aws_iam_role" "ai_inference_role" {
+  name = "ai-inference-role-${var.environment}"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = {
+    Name = "ai-inference-role-${var.environment}"
+  }
+}
+
+# Attach the AmazonSSMManagedInstanceCore policy to the role
+resource "aws_iam_role_policy_attachment" "ssm_managed_instance_core" {
+  role       = aws_iam_role.ai_inference_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+# Attach S3 read-only access for downloading NVIDIA drivers and other resources
+resource "aws_iam_role_policy_attachment" "s3_read_only" {
+  role       = aws_iam_role.ai_inference_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+}
+
+# IAM instance profile for the EC2 instance
+resource "aws_iam_instance_profile" "ai_inference_profile" {
+  name = "ai-inference-profile-${var.environment}"
+  role = aws_iam_role.ai_inference_role.name
+
+  tags = {
+    Name = "ai-inference-profile-${var.environment}"
   }
 }
 
@@ -59,42 +134,51 @@ resource "aws_security_group" "ai_inference" {
   description = "Security group for AI inference server"
   vpc_id      = data.aws_vpc.default.id
 
-  # SSH access
-  ingress {
-    description = "SSH from anywhere (consider restricting in production)"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # HTTP access (for web interfaces)
-  ingress {
-    description = "HTTP access"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # HTTPS access
-  ingress {
-    description = "HTTPS access"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Custom ports for AI inference services
+  # SSH access - only from allowed IPs
   dynamic "ingress" {
-    for_each = var.additional_ports
+    for_each = length(var.allowed_ip_addresses) > 0 ? [1] : []
     content {
-      description = "Custom port ${ingress.value}"
+      description = "SSH access from allowed IPs"
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = var.allowed_ip_addresses
+    }
+  }
+
+  # HTTP access - only from allowed IPs
+  dynamic "ingress" {
+    for_each = length(var.allowed_ip_addresses) > 0 ? [1] : []
+    content {
+      description = "HTTP access from allowed IPs"
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = var.allowed_ip_addresses
+    }
+  }
+
+  # HTTPS access - only from allowed IPs
+  dynamic "ingress" {
+    for_each = length(var.allowed_ip_addresses) > 0 ? [1] : []
+    content {
+      description = "HTTPS access from allowed IPs"
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      cidr_blocks = var.allowed_ip_addresses
+    }
+  }
+
+  # Custom ports for AI inference services - only from allowed IPs
+  dynamic "ingress" {
+    for_each = length(var.allowed_ip_addresses) > 0 ? var.additional_ports : []
+    content {
+      description = "Custom port ${ingress.value} from allowed IPs"
       from_port   = ingress.value
       to_port     = ingress.value
       protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = var.allowed_ip_addresses
     }
   }
 
@@ -115,9 +199,10 @@ resource "aws_security_group" "ai_inference" {
 resource "aws_instance" "ai_inference_server" {
   ami                    = data.aws_ami.ai_inference.id
   instance_type          = var.instance_type
-  key_name               = var.key_pair_name
+  key_name               = aws_key_pair.ai_inference_key.key_name
   vpc_security_group_ids = [aws_security_group.ai_inference.id]
   subnet_id              = data.aws_subnets.default.ids[0]
+  iam_instance_profile   = aws_iam_instance_profile.ai_inference_profile.name
 
   # EBS optimization for better performance
   ebs_optimized = true
@@ -151,7 +236,7 @@ resource "aws_instance" "ai_inference_server" {
   }
 
   # User data script for instance initialization
-  user_data = templatefile("${path.module}/user_data.sh", {
+  user_data = templatefile("${path.module}/scripts/user_data.sh", {
     environment  = var.environment
     project_name = "ai-inference"
   })
@@ -218,4 +303,25 @@ output "ami_id" {
 output "ami_name" {
   description = "Name of the AMI used for the instance"
   value       = data.aws_ami.ai_inference.name
+}
+
+output "ssh_key_name" {
+  description = "Name of the SSH key pair used for the instance"
+  value       = aws_key_pair.ai_inference_key.key_name
+}
+
+output "ssh_private_key_file" {
+  description = "Path to the private SSH key file"
+  value       = local_file.private_key.filename
+  sensitive   = true
+}
+
+output "iam_role_arn" {
+  description = "ARN of the IAM role attached to the instance"
+  value       = aws_iam_role.ai_inference_role.arn
+}
+
+output "instance_profile_name" {
+  description = "Name of the IAM instance profile"
+  value       = aws_iam_instance_profile.ai_inference_profile.name
 }

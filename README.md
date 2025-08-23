@@ -1,8 +1,7 @@
-# AI Engineering Portfolio
+# AI Engineering
 
 A comprehensive collection of AI engineering projects, infrastructure automation, and learning materials demonstrating practical implementations across cloud infrastructure, AI inference systems, and graph-based AI architectures.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![OpenTofu](https://img.shields.io/badge/OpenTofu-1.0+-blue.svg)](https://opentofu.org/)
 [![Packer](https://img.shields.io/badge/Packer-1.7+-green.svg)](https://packer.io/)
 [![AWS](https://img.shields.io/badge/AWS-EC2%20%7C%20EBS-orange.svg)](https://aws.amazon.com/)
@@ -20,9 +19,9 @@ make check-prerequisites
 make setup
 ```
 
-## 📁 Project Structure
+## 📁 Project Structurex
 
-```
+```text
 ai-engineering/
 ├── Makefile                    # Central automation hub - run `make help`
 ├── README.md                   # This file
@@ -49,12 +48,14 @@ This repository serves as a comprehensive portfolio demonstrating:
 A complete infrastructure solution for deploying AI inference workloads on AWS using custom AMIs and OpenTofu.
 
 **Key Features:**
+
 - Custom Ubuntu 24.04 AMI optimized for AI workloads
 - GPU-enabled instances (g5.2xlarge with L4 equivalent)
 - Automated provisioning with security best practices
 - Health monitoring and logging
 
 **Quick Deploy:**
+
 ```bash
 # Build custom AMI
 make ami-build
@@ -77,12 +78,14 @@ make tofu-apply
 The project uses a comprehensive Makefile for all operations. Run `make help` to see all available commands:
 
 **Infrastructure Commands:**
+
 - `make ami-build` - Build custom Ubuntu AI inference AMI
 - `make tofu-plan` - Plan infrastructure deployment
 - `make tofu-apply` - Deploy infrastructure
 - `make tofu-destroy` - Tear down infrastructure
 
 **Utility Commands:**
+
 - `make check-prerequisites` - Verify required tools
 - `make setup` - Complete project initialization
 - `make status` - Show current project status
@@ -91,11 +94,13 @@ The project uses a comprehensive Makefile for all operations. Run `make help` to
 ## 🚧 Planned Projects
 
 ### 2. LangGraph Introduction (`intro-langgraph/`)
+
 - Graph-based AI application development
 - Multi-agent systems and workflows
 - Integration with various LLM providers
 
 ### 3. Additional Infrastructure Components
+
 - Container orchestration (EKS)
 - Model serving platforms
 - Monitoring and observability stack
@@ -110,6 +115,7 @@ Before using this project, ensure you have:
 4. **Make** for automation commands
 
 Quick installation on macOS:
+
 ```bash
 brew install awscli packer opentofu
 ```
@@ -128,10 +134,6 @@ This is a personal learning repository, but feedback and suggestions are welcome
 1. Check existing issues and documentation
 2. Open an issue for bugs or feature requests  
 3. Follow the established code and documentation patterns
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🎓 Learning Resources
 

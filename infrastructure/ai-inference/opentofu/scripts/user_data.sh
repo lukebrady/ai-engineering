@@ -181,3 +181,30 @@ log "  Project: ${project_name}"
 log "  Instance ID: $(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
 log "  Instance Type: $(curl -s http://169.254.169.254/latest/meta-data/instance-type)"
 log "  Availability Zone: $(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)"
+
+hostnamectl set-hostname ai-inference
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install AWS CLI
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+# Install NVIDIA GPU drivers
+apt-get install -y gcc make
+apt-get upgrade -y linux-aws
+apt-get install -y linux-headers-$(uname -r)
+cat << EOF | sudo tee --append /etc/modprobe.d/blacklist.conf
+blacklist vga16fb
+blacklist nouveau
+blacklist rivafb
+blacklist nvidiafb
+blacklist rivatv
+EOF
+aws s3 cp --recursive s3://ec2-linux-nvidia-drivers/latest/ .
+chmod +x NVIDIA-Linux-x86_64*.run
+/bin/sh ./NVIDIA-Linux-x86_64*.run
+
+uv venv --python 3.12 --seed
+source .venv/bin/activate
+uv pip install vllm --torch-backend=auto

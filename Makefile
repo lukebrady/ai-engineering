@@ -103,12 +103,12 @@ tofu-fmt: ## Format OpenTofu configuration files
 .PHONY: tofu-plan
 tofu-plan: tofu-init tofu-validate ## Show OpenTofu deployment plan
 	@echo "$(BLUE)Showing OpenTofu deployment plan...$(NC)"
-	@cd infrastructure/ai-inference/opentofu && tofu plan
+	@cd infrastructure/ai-inference/opentofu && tofu plan -var-file=secure.tfvars
 
 .PHONY: tofu-apply
 tofu-apply: tofu-init tofu-validate ## Deploy infrastructure with OpenTofu
 	@echo "$(BLUE)Deploying infrastructure with OpenTofu...$(NC)"
-	@cd infrastructure/ai-inference/opentofu && tofu apply -auto-approve
+	@cd infrastructure/ai-inference/opentofu && tofu apply -var-file=secure.tfvars -auto-approve
 
 .PHONY: tofu-destroy
 tofu-destroy: ## Destroy infrastructure with OpenTofu

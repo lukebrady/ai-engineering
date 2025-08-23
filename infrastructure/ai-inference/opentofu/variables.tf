@@ -22,13 +22,9 @@ variable "ami_name_prefix" {
 variable "instance_type" {
   description = "EC2 instance type for the AI inference server"
   type        = string
-  default     = "g5.2xlarge" # L4 equivalent (8 vCPU, 32 GB RAM, 1 L4 GPU)
+  default     = "g6.2xlarge" # L4 equivalent (8 vCPU, 32 GB RAM, 1 L4 GPU)
 }
 
-variable "key_pair_name" {
-  description = "Name of the EC2 key pair for SSH access"
-  type        = string
-}
 
 variable "root_volume_size" {
   description = "Size of the root volume in GB"
@@ -56,6 +52,19 @@ variable "additional_ports" {
   description = "Additional ports to open in the security group"
   type        = list(number)
   default     = [8000, 8080, 8888] # Common AI inference ports
+}
+
+variable "allowed_ip_addresses" {
+  description = "List of IP addresses (CIDR blocks) allowed to access the server"
+  type        = list(string)
+  default     = [] # Empty list by default - user must specify IPs for security
+  
+  validation {
+    condition = alltrue([
+      for ip in var.allowed_ip_addresses : can(cidrhost(ip, 0))
+    ])
+    error_message = "All IP addresses must be valid CIDR blocks (e.g., '192.168.1.1/32' or '10.0.0.0/8')."
+  }
 }
 
 variable "create_eip" {

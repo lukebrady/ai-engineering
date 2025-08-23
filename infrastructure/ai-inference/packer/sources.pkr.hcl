@@ -1,7 +1,13 @@
 # Build sources for Ubuntu 24.04 AI Inference AMI
 
+locals {
+  # ISO-8601 timestamp formats
+  ami_timestamp = "{{isotime \"2006-01-02T15-04-05\"}}"  # AMI-compatible (no colons)
+  tag_timestamp = "{{isotime \"2006-01-02T15:04:05\"}}"  # Proper ISO-8601 with colons
+}
+
 source "amazon-ebs" "ubuntu" {
-  ami_name        = "${var.ami_name_prefix}-{{timestamp}}"
+  ami_name        = "${var.ami_name_prefix}-${local.ami_timestamp}"
   ami_description = var.ami_description
   instance_type   = var.instance_type
   region          = var.aws_region
@@ -21,11 +27,11 @@ source "amazon-ebs" "ubuntu" {
   
   # Tags
   run_tags = {
-    Name          = "${var.ami_name_prefix}-{{timestamp}}"
+    Name          = "${var.ami_name_prefix}-${local.ami_timestamp}"
     Environment   = "development"
     Purpose       = "ai-inference"
     OS            = "ubuntu-24.04"
-    BuildDate     = "{{timestamp}}"
+    BuildDate     = local.tag_timestamp
     PackerVersion = "{{packer_version}}"
   }
 }
