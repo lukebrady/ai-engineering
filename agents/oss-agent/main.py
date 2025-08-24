@@ -3,15 +3,16 @@
 OSS Agent Example - A Simple Agent Using Open Source Models
 
 This example demonstrates how to:
-1. Connect to a locally hosted OSS model using OpenAI-compatible API
+1. Connect to a hosted OSS model using OpenAI-compatible API
 2. Create function calling tools for the agent to use
 3. Implement a basic agent conversation loop with tool execution
 4. Handle tool call responses and continue conversations
 
 Prerequisites:
-- A running OSS model server (e.g., vLLM, Ollama, text-generation-inference)
-- The server should be OpenAI API compatible and running on localhost:8000
+- A running vLLM server with OpenAI API compatibility enabled
+- The server should be running on <API_ENDPOINT>:8000/v1 (vLLM default)
 - Environment variable API_ENDPOINT should be set to the server's hostname/IP
+- Note: For Ollama, change base_url to f"http://{os.getenv('API_ENDPOINT')}:11434" (no /v1)
 
 Usage:
     python main.py
@@ -29,13 +30,12 @@ from pydantic import BaseModel
 # This keeps sensitive configuration like API endpoints separate from code
 load_dotenv(dotenv_path=".env.secure")
 
-# Create OpenAI client configured for local OSS model server
+# Create OpenAI client configured for vLLM server
 # The empty api_key works for most local deployments that don't require auth
-# base_url points to your local model server (e.g., vLLM, Ollama, etc.)
+# base_url uses vLLM's default port 8000 with /v1 OpenAI-compatible endpoint
 client = OpenAI(api_key="", base_url=f"http://{os.getenv('API_ENDPOINT')}:8000/v1")
 
 # Specify the model name - this should match what's loaded in your model server
-# Common OSS models: "Qwen/Qwen2.5-7B-Instruct", "meta-llama/Llama-3.1-8B-Instruct", etc.
 model = "Qwen/Qwen3-0.6B"
 
 
