@@ -22,9 +22,12 @@ import os
 import json
 import wikipedia
 
+
 from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import BaseModel
+from rich.console import Console
+from rich.markdown import Markdown
 
 # Load environment variables from a secure .env file
 # This keeps sensitive configuration like API endpoints separate from code
@@ -92,77 +95,86 @@ def main():
     2. Handle any tool calls the model makes
     3. Send tool results back to get final response
     """
-    # Initialize the conversation with system and user messages
-    # The system message sets the agent's behavior and personality
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "What is the capital of France?"},
-    ]
-    
-    # Make the first API call with tools available
-    # tool_choice="required" forces the model to use a tool (good for testing)
-    # In production, you might use "auto" to let the model decide
-    response = client.chat.completions.create(
-        model=model,
-        messages=messages,
-        tools=[tool_definitions],  # List of available tools
-        tool_choice="required",    # Force tool usage (optional)
-    )
-    
-    # Add the model's response to our message history
-    # This preserves the conversation context for future calls
-    messages.append(response.choices[0].message)
+    console = Console()
 
-    # Check if the model wants to call any tools
-    # The model can request multiple tool calls in a single response
-    if response.choices[0].message.tool_calls:
-        # Process each tool call the model requested
-        for tool_call in response.choices[0].message.tool_calls:
-            function_name = tool_call.function.name
-            
-            # Validate that we have the requested function available
-            # This prevents errors if the model hallucinates function names
-            if function_name not in tools_map:
-                # Return an error message to the model if function doesn't exist
+    while True:
+        user_input = console.input("Enter a query: ")
+        if user_input.lower() == "exit":
+            break
+
+        # Initialize the conversation with system and user messages
+        # The system message sets the agent's behavior and personality
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": user_input},
+        ]
+        
+        # Make the first API call with tools available
+        # tool_choice="required" forces the model to use a tool (good for testing)
+        # In production, you might use "auto" to let the model decide
+        response = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            tools=[tool_definitions],  # List of available tools
+            tool_choice="required",    # Force tool usage (optional)
+        )
+        
+        # Add the model's response to our message history
+        # This preserves the conversation context for future calls
+        messages.append(response.choices[0].message)
+
+        # Check if the model wants to call any tools
+        # The model can request multiple tool calls in a single response
+        if response.choices[0].message.tool_calls:
+            # Process each tool call the model requested
+            for tool_call in response.choices[0].message.tool_calls:
+                function_name = tool_call.function.name
+                
+                # Validate that we have the requested function available
+                # This prevents errors if the model hallucinates function names
+                if function_name not in tools_map:
+                    # Return an error message to the model if function doesn't exist
+                    messages.append(
+                        {
+                            "role": "tool",
+                            "content": json.dumps(
+                                {"error": f"Function {function_name} not found"}
+                            ),
+                            "tool_call_id": tool_call.id,  # Must match the call ID
+                        }
+                    )
+                    continue
+                
+                # Parse the function arguments from JSON
+                # The model provides arguments as a JSON string
+                function_args = json.loads(tool_call.function.arguments)
+
+                # Execute the actual function with the provided arguments
+                # This is where the real work happens - calling external APIs, databases, etc.
+                result = tools_map[function_name](**function_args)
+
+                # Send the function result back to the model
+                # The model will use this information to generate its final response
                 messages.append(
                     {
-                        "role": "tool",
-                        "content": json.dumps(
-                            {"error": f"Function {function_name} not found"}
-                        ),
-                        "tool_call_id": tool_call.id,  # Must match the call ID
+                        "role": "tool",  # Special role for tool results
+                        "content": json.dumps(result),  # Function output as JSON
+                        "tool_call_id": tool_call.id,   # Must match the original call ID
                     }
                 )
-                continue
-            
-            # Parse the function arguments from JSON
-            # The model provides arguments as a JSON string
-            function_args = json.loads(tool_call.function.arguments)
 
-            # Execute the actual function with the provided arguments
-            # This is where the real work happens - calling external APIs, databases, etc.
-            result = tools_map[function_name](**function_args)
-
-            # Send the function result back to the model
-            # The model will use this information to generate its final response
-            messages.append(
-                {
-                    "role": "tool",  # Special role for tool results
-                    "content": json.dumps(result),  # Function output as JSON
-                    "tool_call_id": tool_call.id,   # Must match the original call ID
-                }
-            )
-
-    # Make a final API call to get the model's response using the tool results
-    # No tools are needed this time - we just want the final answer
-    final_response = client.chat.completions.create(
-        model=model,
-        messages=messages,  # Includes original query + tool calls + tool results
-    )
-    
-    # Print the model's final response
-    # This should incorporate the information gathered from the tool calls
-    print(final_response.choices[0].message.content)
+        # Make a final API call to get the model's response using the tool results
+        # No tools are needed this time - we just want the final answer
+        final_response = client.chat.completions.create(
+            model=model,
+            messages=messages,  # Includes original query + tool calls + tool results
+        )
+        
+        # Print the model's final response
+        # This should incorporate the information gathered from the tool calls
+        content = final_response.choices[0].message.content
+        if content:
+            console.print(Markdown(content))
 
 
 if __name__ == "__main__":
