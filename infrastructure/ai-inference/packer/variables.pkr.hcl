@@ -43,6 +43,13 @@ variable "volume_type" {
   default     = "gp3"
 }
 
+# NVIDIA Container Toolkit version
+variable "nvidia_container_toolkit_version" {
+  type        = string
+  description = "NVIDIA Container Toolkit version"
+  default     = "1.17.8-1"
+}
+
 # Optional network configuration variables
 variable "subnet_id" {
   type        = string

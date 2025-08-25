@@ -116,7 +116,7 @@ def main():
             model=model,
             messages=messages,
             tools=[tool_definitions],  # List of available tools
-            tool_choice="required",    # Force tool usage (optional)
+            tool_choice="auto",    # Force tool usage (optional)
         )
         
         # Add the model's response to our message history

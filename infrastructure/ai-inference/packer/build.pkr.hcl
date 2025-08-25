@@ -12,7 +12,7 @@ build {
     script = "scripts/provision.sh"
     environment_vars = [
       "DEBIAN_FRONTEND=noninteractive",
-      "PYTHONUNBUFFERED=1"
+      "NVIDIA_CONTAINER_TOOLKIT_VERSION=${var.nvidia_container_toolkit_version}"
     ]
   }
 

@@ -26,10 +26,14 @@ ai-engineering/
 ├── Makefile                    # 🎯 EXECUTABLE INTERFACE - Universal tool catalog
 ├── README.md                   # This file
 ├── .github/workflows/          # CI/CD automation for tool validation
+├── agents/                     # AI agent implementations and examples
+│   └── oss-agent/             # Example agent using open source models
 ├── infrastructure/             # Cloud infrastructure projects
 │   └── ai-inference/           # Production-ready AI inference infrastructure
-│       ├── packer/             # Custom Ubuntu 24.04 AMI builder
-│       └── opentofu/           # Infrastructure as Code deployment
+│       ├── packer/             # Custom Ubuntu 24.04 AMI builder with GPU support
+│       └── opentofu/           # Modular Infrastructure as Code deployment
+│           ├── iam/            # IAM roles and permissions
+│           └── inference/      # EC2 instances and vLLM service
 └── intro-langgraph/            # (Planned) LangGraph learning project
 ```
 
@@ -64,14 +68,15 @@ This repository serves as a comprehensive portfolio demonstrating:
 
 ### 1. AI Inference Infrastructure (`infrastructure/ai-inference/`)
 
-A complete infrastructure solution for deploying AI inference workloads on AWS using custom AMIs and OpenTofu.
+A complete infrastructure solution for deploying AI inference workloads on AWS using custom AMIs and modular OpenTofu configuration.
 
 **Key Features:**
 
-- Custom Ubuntu 24.04 AMI optimized for AI workloads
+- Custom Ubuntu 24.04 AMI with Docker, NVIDIA drivers, and GPU support
+- Modular deployment: separate IAM and inference components
+- vLLM server with systemd integration and container lifecycle management
 - GPU-enabled instances (g5.2xlarge with L4 equivalent)
 - Automated provisioning with security best practices
-- Health monitoring and logging
 
 **Quick Deploy:**
 
@@ -79,17 +84,37 @@ A complete infrastructure solution for deploying AI inference workloads on AWS u
 # Build custom AMI
 make ami-build
 
-# Deploy infrastructure
-make tofu-plan
-make tofu-apply
+# Deploy IAM resources
+make tofu-iam-apply
+
+# Deploy inference infrastructure
+make tofu-inference-apply
+```
+
+### 2. OSS Agent Example (`agents/oss-agent/`)
+
+A practical example of building AI agents using open source models with comprehensive documentation.
+
+**Key Features:**
+
+- OpenAI-compatible API integration for local models (vLLM, Ollama)
+- Function calling with Wikipedia search tools
+- Interactive REPL with Rich formatting
+- Comprehensive comments explaining agent patterns and OSS model usage
+
+**Quick Start:**
+
+```bash
+cd agents/oss-agent
+python main.py  # Interactive agent with Wikipedia search
 ```
 
 ## 🛠️ Technologies
 
-- **Infrastructure**: OpenTofu (Terraform), Packer, AWS (EC2, EBS, VPC)
-- **Automation**: Make, Bash scripting, GitHub Actions (planned)
-- **AI/ML**: Python, GPU acceleration, model serving frameworks
-- **Monitoring**: CloudWatch, custom health checks
+- **Infrastructure**: OpenTofu (Terraform), Packer, AWS (EC2, EBS, VPC, IAM)
+- **AI/ML**: vLLM, Python, GPU acceleration, OpenAI-compatible APIs
+- **Containerization**: Docker, systemd service management
+- **Automation**: Make, Bash scripting, GitHub Actions
 - **Security**: EBS encryption, security groups, IAM best practices
 
 ## 📋 Executable Tool Catalog
@@ -112,11 +137,18 @@ AMI/Packer Commands:
   ami-init                  Initialize Packer plugins
   ami-validate              Validate Packer configuration
 
+Agent Commands:
+  agent-oss-check           Check OSS agent environment and dependencies
+  agent-oss-install         Install OSS agent dependencies
+  agent-oss-run             Run the OSS agent interactively
+
 Infrastructure/OpenTofu Commands:
-  tofu-apply                Deploy infrastructure with OpenTofu
-  tofu-init                 Initialize OpenTofu configuration
-  tofu-plan                 Show OpenTofu deployment plan
-  tofu-validate             Validate OpenTofu configuration
+  tofu-apply                Deploy all infrastructure with OpenTofu
+  tofu-iam-apply            Deploy IAM infrastructure with OpenTofu
+  tofu-inference-apply      Deploy inference infrastructure with OpenTofu
+  tofu-init                 Initialize all OpenTofu modules
+  tofu-plan                 Show deployment plan for all modules
+  tofu-validate             Validate all OpenTofu modules
 
 Setup & Verification Commands:
   check-aws-config          Check AWS configuration and permissions
@@ -143,9 +175,16 @@ The Makefile format is specifically designed to be:
 **Infrastructure Commands:**
 
 - `make ami-build` - Build custom Ubuntu AI inference AMI
-- `make tofu-plan` - Plan infrastructure deployment
-- `make tofu-apply` - Deploy infrastructure
-- `make tofu-destroy` - Tear down infrastructure
+- `make tofu-iam-apply` - Deploy IAM resources (roles, policies)
+- `make tofu-inference-apply` - Deploy inference infrastructure (EC2, vLLM)
+- `make tofu-apply` - Deploy all infrastructure (IAM + inference)
+- `make tofu-destroy` - Tear down all infrastructure
+
+**Agent Commands:**
+
+- `make agent-oss-run` - Run the OSS agent interactively
+- `make agent-oss-install` - Install OSS agent dependencies
+- `make agent-oss-check` - Check agent environment and dependencies
 
 **Utility Commands:**
 
@@ -193,7 +232,7 @@ brew install awscli packer opentofu
 Each subproject contains detailed documentation:
 
 - [`infrastructure/ai-inference/packer/README.md`](infrastructure/ai-inference/packer/README.md) - AMI building guide
-- [`infrastructure/ai-inference/opentofu/README.md`](infrastructure/ai-inference/opentofu/README.md) - Infrastructure deployment guide
+- [`agents/oss-agent/main.py`](agents/oss-agent/main.py) - Comprehensive agent implementation with inline documentation
 
 ## 🤝 Contributing
 

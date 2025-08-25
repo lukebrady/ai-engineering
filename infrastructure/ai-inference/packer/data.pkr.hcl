@@ -11,3 +11,8 @@ data "amazon-ami" "ubuntu" {
     architecture = "x86_64"
   }
 }
+
+data "amazon-parameterstore" "ai_inference_profile" {
+  name = "ai-inference-profile"
+  with_decryption = false
+}

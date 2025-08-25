@@ -53,7 +53,7 @@ data "aws_subnets" "default" {
 }
 
 data "aws_iam_instance_profile" "ai_inference_profile" {
-  name = "ai-inference-profile-${var.environment}"
+  name = "ai-inference-profile"
 }
 
 resource "aws_security_group" "ai_inference" {

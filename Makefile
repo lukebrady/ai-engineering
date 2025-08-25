@@ -25,6 +25,9 @@ help: ## Show this help message
 	@echo "$(YELLOW)AMI/Packer Commands:$(NC)"
 	@awk 'BEGIN {FS = ":.*?## "} /^ami-|^test-provision-script:.*?## / {printf "  $(GREEN)%-25s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 	@echo ""
+	@echo "$(YELLOW)Agent Commands:$(NC)"
+	@awk 'BEGIN {FS = ":.*?## "} /^agent-.*:.*?## / {printf "  $(GREEN)%-25s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
+	@echo ""
 	@echo "$(YELLOW)Infrastructure/OpenTofu Commands:$(NC)"
 	@awk 'BEGIN {FS = ":.*?## "} /^tofu-.*:.*?## / {printf "  $(GREEN)%-25s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 	@echo ""
@@ -214,6 +217,25 @@ tofu-logs: ## Show recent OpenTofu logs for both modules
 	else \
 		echo "$(YELLOW)No OpenTofu inference logs found.$(NC)"; \
 	fi
+
+# Agent commands
+.PHONY: agent-oss-run
+agent-oss-run: ## Run the OSS agent interactively
+	@echo "$(BLUE)Starting OSS Agent...$(NC)"
+	@echo "$(YELLOW)Make sure you have a vLLM server running and API_ENDPOINT set$(NC)"
+	@cd agents/oss-agent && python main.py
+
+.PHONY: agent-oss-install
+agent-oss-install: ## Install OSS agent dependencies
+	@echo "$(BLUE)Installing OSS agent dependencies...$(NC)"
+	@cd agents/oss-agent && uv sync
+
+.PHONY: agent-oss-check
+agent-oss-check: ## Check OSS agent environment and dependencies
+	@echo "$(BLUE)Checking OSS agent environment...$(NC)"
+	@cd agents/oss-agent && python -c "import openai, wikipedia, rich, pydantic; print('All dependencies available')" || echo "$(RED)Missing dependencies. Run 'make agent-oss-install'$(NC)"
+	@echo "$(BLUE)Environment variables:$(NC)"
+	@echo "  API_ENDPOINT: ${API_ENDPOINT:-Not set}"
 
 .PHONY: ami-clean
 ami-clean: ## Clean up build artifacts and logs

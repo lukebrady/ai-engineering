@@ -17,6 +17,8 @@ source "amazon-ebs" "ubuntu" {
   ssh_username = var.ssh_username
   ssh_timeout  = "10m"
 
+  iam_instance_profile = data.amazon-parameterstore.ai_inference_profile.value
+
   # EBS configuration - using launch_block_device_mappings for volume configuration
   launch_block_device_mappings {
     device_name = "/dev/sda1"
