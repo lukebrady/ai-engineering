@@ -92,64 +92,127 @@ test-provision-script: ## Test the provision script locally (requires Ubuntu env
 		echo "$(RED)Provision script not found!$(NC)"; \
 	fi
 
-# OpenTofu commands
+# OpenTofu commands - IAM Module
+.PHONY: tofu-iam-init
+tofu-iam-init: ## Initialize OpenTofu IAM module
+	@echo "$(BLUE)Initializing OpenTofu IAM module...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/iam && tofu init
+
+.PHONY: tofu-iam-validate
+tofu-iam-validate: ## Validate OpenTofu IAM module
+	@echo "$(BLUE)Validating OpenTofu IAM module...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/iam && tofu validate
+
+.PHONY: tofu-iam-fmt
+tofu-iam-fmt: ## Format OpenTofu IAM module files
+	@echo "$(BLUE)Formatting OpenTofu IAM module files...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/iam && tofu fmt
+
+.PHONY: tofu-iam-plan
+tofu-iam-plan: tofu-iam-init tofu-iam-validate ## Show OpenTofu IAM deployment plan
+	@echo "$(BLUE)Showing OpenTofu IAM deployment plan...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/iam && tofu plan
+
+.PHONY: tofu-iam-apply
+tofu-iam-apply: tofu-iam-init tofu-iam-validate ## Deploy IAM infrastructure with OpenTofu
+	@echo "$(BLUE)Deploying IAM infrastructure with OpenTofu...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/iam && tofu apply -auto-approve
+
+.PHONY: tofu-iam-destroy
+tofu-iam-destroy: ## Destroy IAM infrastructure with OpenTofu
+	@echo "$(BLUE)Destroying IAM infrastructure with OpenTofu...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/iam && tofu destroy -auto-approve
+
+.PHONY: tofu-iam-output
+tofu-iam-output: ## Show OpenTofu IAM outputs
+	@echo "$(BLUE)Showing OpenTofu IAM outputs...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/iam && tofu output
+
+# OpenTofu commands - Inference Module
+.PHONY: tofu-inference-init
+tofu-inference-init: ## Initialize OpenTofu inference module
+	@echo "$(BLUE)Initializing OpenTofu inference module...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/inference && tofu init
+
+.PHONY: tofu-inference-validate
+tofu-inference-validate: ## Validate OpenTofu inference module
+	@echo "$(BLUE)Validating OpenTofu inference module...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/inference && tofu validate
+
+.PHONY: tofu-inference-fmt
+tofu-inference-fmt: ## Format OpenTofu inference module files
+	@echo "$(BLUE)Formatting OpenTofu inference module files...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/inference && tofu fmt
+
+.PHONY: tofu-inference-plan
+tofu-inference-plan: tofu-inference-init tofu-inference-validate ## Show OpenTofu inference deployment plan
+	@echo "$(BLUE)Showing OpenTofu inference deployment plan...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/inference && tofu plan -var-file=secure.tfvars
+
+.PHONY: tofu-inference-apply
+tofu-inference-apply: tofu-inference-init tofu-inference-validate ## Deploy inference infrastructure with OpenTofu
+	@echo "$(BLUE)Deploying inference infrastructure with OpenTofu...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/inference && tofu apply -var-file=secure.tfvars -auto-approve
+
+.PHONY: tofu-inference-destroy
+tofu-inference-destroy: ## Destroy inference infrastructure with OpenTofu
+	@echo "$(BLUE)Destroying inference infrastructure with OpenTofu...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/inference && tofu destroy -var-file=secure.tfvars -auto-approve
+
+.PHONY: tofu-inference-output
+tofu-inference-output: ## Show OpenTofu inference outputs
+	@echo "$(BLUE)Showing OpenTofu inference outputs...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/inference && tofu output
+
+# OpenTofu commands - All Modules
 .PHONY: tofu-init
-tofu-init: ## Initialize OpenTofu configuration
-	@echo "$(BLUE)Initializing OpenTofu configuration...$(NC)"
-	@cd infrastructure/ai-inference/opentofu && tofu init
+tofu-init: tofu-iam-init tofu-inference-init ## Initialize all OpenTofu modules
 
 .PHONY: tofu-validate
-tofu-validate: ## Validate OpenTofu configuration
-	@echo "$(BLUE)Validating OpenTofu configuration...$(NC)"
-	@cd infrastructure/ai-inference/opentofu && tofu validate
+tofu-validate: tofu-iam-validate tofu-inference-validate ## Validate all OpenTofu modules
 
 .PHONY: tofu-fmt
-tofu-fmt: ## Format OpenTofu configuration files
-	@echo "$(BLUE)Formatting OpenTofu configuration files...$(NC)"
-	@cd infrastructure/ai-inference/opentofu && tofu fmt
+tofu-fmt: tofu-iam-fmt tofu-inference-fmt ## Format all OpenTofu configuration files
 
 .PHONY: tofu-plan
-tofu-plan: tofu-init tofu-validate ## Show OpenTofu deployment plan
-	@echo "$(BLUE)Showing OpenTofu deployment plan...$(NC)"
-	@cd infrastructure/ai-inference/opentofu && tofu plan -var-file=secure.tfvars
+tofu-plan: tofu-iam-plan tofu-inference-plan ## Show deployment plan for all modules
 
 .PHONY: tofu-apply
-tofu-apply: tofu-init tofu-validate ## Deploy infrastructure with OpenTofu
-	@echo "$(BLUE)Deploying infrastructure with OpenTofu...$(NC)"
-	@cd infrastructure/ai-inference/opentofu && tofu apply -var-file=secure.tfvars -auto-approve
+tofu-apply: tofu-iam-apply tofu-inference-apply ## Deploy all infrastructure with OpenTofu
 
 .PHONY: tofu-destroy
-tofu-destroy: ## Destroy infrastructure with OpenTofu
-	@echo "$(BLUE)Destroying infrastructure with OpenTofu...$(NC)"
-	@cd infrastructure/ai-inference/opentofu && tofu destroy -auto-approve
-
-.PHONY: tofu-plan-destroy
-tofu-plan-destroy: ## Show OpenTofu destruction plan
-	@echo "$(BLUE)Showing OpenTofu destruction plan...$(NC)"
-	@cd infrastructure/ai-inference/opentofu && tofu plan -destroy
+tofu-destroy: tofu-inference-destroy tofu-iam-destroy ## Destroy all infrastructure with OpenTofu
 
 .PHONY: tofu-output
-tofu-output: ## Show OpenTofu outputs
-	@echo "$(BLUE)Showing OpenTofu outputs...$(NC)"
-	@cd infrastructure/ai-inference/opentofu && tofu output
+tofu-output: tofu-iam-output tofu-inference-output ## Show outputs for all modules
 
 .PHONY: tofu-refresh
-tofu-refresh: ## Refresh OpenTofu state
-	@echo "$(BLUE)Refreshing OpenTofu state...$(NC)"
-	@cd infrastructure/ai-inference/opentofu && tofu refresh
+tofu-refresh: ## Refresh OpenTofu state for both modules
+	@echo "$(BLUE)Refreshing OpenTofu IAM state...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/iam && tofu refresh
+	@echo "$(BLUE)Refreshing OpenTofu inference state...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/inference && tofu refresh -var-file=secure.tfvars
 
 .PHONY: tofu-state
-tofu-state: ## Show OpenTofu state
-	@echo "$(BLUE)Showing OpenTofu state...$(NC)"
-	@cd infrastructure/ai-inference/opentofu && tofu show
+tofu-state: ## Show OpenTofu state for both modules
+	@echo "$(BLUE)Showing OpenTofu IAM state...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/iam && tofu show
+	@echo "$(BLUE)Showing OpenTofu inference state...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/inference && tofu show
 
 .PHONY: tofu-logs
-tofu-logs: ## Show recent OpenTofu logs
-	@echo "$(BLUE)Recent OpenTofu logs:$(NC)"
-	@if [ -f infrastructure/ai-inference/opentofu/.terraform/logs/tofu.log ]; then \
-		tail -50 infrastructure/ai-inference/opentofu/.terraform/logs/tofu.log; \
+tofu-logs: ## Show recent OpenTofu logs for both modules
+	@echo "$(BLUE)Recent OpenTofu IAM logs:$(NC)"
+	@if [ -f infrastructure/ai-inference/opentofu/iam/.terraform/logs/tofu.log ]; then \
+		tail -25 infrastructure/ai-inference/opentofu/iam/.terraform/logs/tofu.log; \
 	else \
-		echo "$(YELLOW)No OpenTofu logs found. Run 'make tofu-init' first.$(NC)"; \
+		echo "$(YELLOW)No OpenTofu IAM logs found.$(NC)"; \
+	fi
+	@echo "$(BLUE)Recent OpenTofu inference logs:$(NC)"
+	@if [ -f infrastructure/ai-inference/opentofu/inference/.terraform/logs/tofu.log ]; then \
+		tail -25 infrastructure/ai-inference/opentofu/inference/.terraform/logs/tofu.log; \
+	else \
+		echo "$(YELLOW)No OpenTofu inference logs found.$(NC)"; \
 	fi
 
 .PHONY: ami-clean

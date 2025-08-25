@@ -24,50 +24,6 @@ resource "local_file" "private_key" {
   file_permission = "0600"
 }
 
-# IAM role for EC2 instance with SSM access
-resource "aws_iam_role" "ai_inference_role" {
-  name = "ai-inference-role-${var.environment}"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      }
-    ]
-  })
-
-  tags = {
-    Name = "ai-inference-role-${var.environment}"
-  }
-}
-
-# Attach the AmazonSSMManagedInstanceCore policy to the role
-resource "aws_iam_role_policy_attachment" "ssm_managed_instance_core" {
-  role       = aws_iam_role.ai_inference_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
-# Attach S3 read-only access for downloading NVIDIA drivers and other resources
-resource "aws_iam_role_policy_attachment" "s3_read_only" {
-  role       = aws_iam_role.ai_inference_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
-}
-
-# IAM instance profile for the EC2 instance
-resource "aws_iam_instance_profile" "ai_inference_profile" {
-  name = "ai-inference-profile-${var.environment}"
-  role = aws_iam_role.ai_inference_role.name
-
-  tags = {
-    Name = "ai-inference-profile-${var.environment}"
-  }
-}
-
 # Data source for the latest Ubuntu 24.04 AI Inference AMI
 data "aws_ami" "ai_inference" {
   most_recent = true
@@ -94,6 +50,10 @@ data "aws_subnets" "default" {
     name   = "vpc-id"
     values = [data.aws_vpc.default.id]
   }
+}
+
+data "aws_iam_instance_profile" "ai_inference_profile" {
+  name = "ai-inference-profile-${var.environment}"
 }
 
 resource "aws_security_group" "ai_inference" {
@@ -169,7 +129,7 @@ resource "aws_instance" "ai_inference_server" {
   key_name               = aws_key_pair.ai_inference_key.key_name
   vpc_security_group_ids = [aws_security_group.ai_inference.id]
   subnet_id              = data.aws_subnets.default.ids[0]
-  iam_instance_profile   = aws_iam_instance_profile.ai_inference_profile.name
+  iam_instance_profile   = data.aws_iam_instance_profile.ai_inference_profile.name
 
   # EBS optimization for better performance
   ebs_optimized = true
@@ -204,8 +164,8 @@ resource "aws_instance" "ai_inference_server" {
 
   # User data script for instance initialization
   user_data = templatefile("${path.module}/scripts/user_data.sh", {
-    environment  = var.environment
-    project_name = "ai-inference"
+    hugging_face_token = var.hugging_face_token
+    model              = var.model
   })
 
   # Instance metadata options for security

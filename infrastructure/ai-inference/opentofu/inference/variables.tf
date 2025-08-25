@@ -58,7 +58,7 @@ variable "allowed_ip_addresses" {
   description = "List of IP addresses (CIDR blocks) allowed to access the server"
   type        = list(string)
   default     = [] # Empty list by default - user must specify IPs for security
-  
+
   validation {
     condition = alltrue([
       for ip in var.allowed_ip_addresses : can(cidrhost(ip, 0))
@@ -90,4 +90,11 @@ variable "hugging_face_token" {
   description = "Hugging Face token"
   type        = string
   sensitive   = true
+}
+
+# Can be passed in via TF_VAR_model=<model>
+variable "model" {
+  description = "Model to use for inference"
+  type        = string
+  default     = "Qwen/Qwen3-0.6B"
 }
