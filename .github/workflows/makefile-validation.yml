@@ -9,6 +9,7 @@ env:
   AWS_REGION: us-east-1
   INSTANCE_TYPE: t3.medium
   AMI_NAME_PREFIX: ubuntu-24.04-ai-inference
+  PATH: /usr/local/bin:${{ env.PATH }}
 
 jobs:
   setup-tools:
