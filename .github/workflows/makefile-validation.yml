@@ -23,6 +23,7 @@ jobs:
         with:
           path: |
             /usr/local/bin/packer
+            /usr/bin/tofu
             /usr/local/bin/tofu
           key: tools-${{ runner.os }}-v1
           
@@ -57,6 +58,7 @@ jobs:
         with:
           path: |
             /usr/local/bin/packer
+            /usr/bin/tofu
             /usr/local/bin/tofu
           key: tools-${{ runner.os }}-v1
           
@@ -78,6 +80,7 @@ jobs:
         with:
           path: |
             /usr/local/bin/packer
+            /usr/bin/tofu
             /usr/local/bin/tofu
           key: tools-${{ runner.os }}-v1
           
@@ -102,6 +105,7 @@ jobs:
         with:
           path: |
             /usr/local/bin/packer
+            /usr/bin/tofu
             /usr/local/bin/tofu
           key: tools-${{ runner.os }}-v1
           
@@ -130,6 +134,7 @@ jobs:
         with:
           path: |
             /usr/local/bin/packer
+            /usr/bin/tofu
             /usr/local/bin/tofu
           key: tools-${{ runner.os }}-v1
           
@@ -159,6 +164,7 @@ jobs:
         with:
           path: |
             /usr/local/bin/packer
+            /usr/bin/tofu
             /usr/local/bin/tofu
           key: tools-${{ runner.os }}-v1
           
@@ -179,6 +185,7 @@ jobs:
         with:
           path: |
             /usr/local/bin/packer
+            /usr/bin/tofu
             /usr/local/bin/tofu
           key: tools-${{ runner.os }}-v1
           
