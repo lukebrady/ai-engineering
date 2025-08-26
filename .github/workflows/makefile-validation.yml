@@ -1,0 +1,134 @@
+name: Makefile Validation
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  INSTANCE_TYPE: t3.medium
+  AMI_NAME_PREFIX: ubuntu-24.04-ai-inference
+
+jobs:
+  setup-tools:
+    name: Setup Tools
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Cache Tools
+        id: cache-tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/bin/packer
+          key: tools-${{ runner.os }}-v1
+          
+      - name: Install Packer
+        if: steps.cache-tools.outputs.cache-hit != 'true'
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt-get update && sudo apt-get install packer
+          
+      - name: Verify Tool Installation
+        run: |
+          packer version
+          aws --version
+
+  help-and-status:
+    name: Help and Status Commands
+    runs-on: ubuntu-latest
+    needs: setup-tools
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Restore Tools Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/bin/packer
+          key: tools-${{ runner.os }}-v1
+          
+      - name: Test Help Command
+        run: make help
+        
+      - name: Test Status Command
+        run: make status
+
+  packer-validation:
+    name: Packer Configuration Tests
+    runs-on: ubuntu-latest
+    needs: setup-tools
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Restore Tools Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/bin/packer
+          key: tools-${{ runner.os }}-v1
+          
+      - name: Initialize Packer
+        run: make ami-init
+        
+      - name: Validate Packer Configuration
+        run: make ami-validate
+        
+      - name: Test Provision Script Check
+        run: make test-provision-script
+
+
+  logs-and-output:
+    name: Logs and Output Tests
+    runs-on: ubuntu-latest
+    needs: setup-tools
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Restore Tools Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/bin/packer
+          key: tools-${{ runner.os }}-v1
+          
+      - name: Test AMI Logs (Expected to show no logs message)
+        run: make ami-logs
+        
+
+  setup-integration:
+    name: Setup Integration Test
+    runs-on: ubuntu-latest
+    needs: setup-tools
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Restore Tools Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/bin/packer
+          key: tools-${{ runner.os }}-v1
+          
+      - name: Test Setup Command (Will fail on AWS check, but tests other components)
+        run: make setup || echo "Setup failed on AWS credentials check (expected without real credentials)"
+        continue-on-error: true
+
+  aws-integration:
+    name: AWS Integration Tests
+    runs-on: ubuntu-latest
+    needs: setup-tools
+    if: github.event_name == 'workflow_dispatch' # Only run on manual trigger
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Restore Tools Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/bin/packer
+          key: tools-${{ runner.os }}-v1
+          

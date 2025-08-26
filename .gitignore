@@ -1,0 +1,61 @@
+# Packer build artifacts
+*.box
+*.ova
+*.ovf
+*.vmdk
+*.vhd
+*.vhdx
+
+# Packer manifest files
+manifest.json
+packer-manifest.json
+
+# Log files
+*.log
+build.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Secrets
+.env.secure
+
+# AWS credentials (if accidentally committed)
+.aws/
+credentials
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Terraform/OpenTofu files
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+secure.tfvars
+
+# Generated SSH keys (contains private keys)
+*.pem
+*.key
+ai-inference-key-*
+
+# Local Packer variables (for environment-specific customizations)
+local.pkr.hcl
+
+# Script logs and temporary files
+scripts/*.log
+scripts/temp/
