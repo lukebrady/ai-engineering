@@ -23,7 +23,6 @@ jobs:
         with:
           path: |
             /usr/local/bin/packer
-            /usr/local/bin/tofu
           key: tools-${{ runner.os }}-v1
           
       - name: Install Packer
@@ -33,20 +32,10 @@ jobs:
           sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
           sudo apt-get update && sudo apt-get install packer
           
-      - name: Install OpenTofu
-        if: steps.cache-tools.outputs.cache-hit != 'true'
-        run: |
-          curl -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
-          sudo bash install-opentofu.sh --install-method deb
-          # Copy to cacheable location
-          sudo cp /usr/bin/tofu /usr/local/bin/tofu
-          
       - name: Verify Tool Installation
         run: |
           packer version
           aws --version
-          export PATH="/usr/local/bin:$PATH"
-          tofu version
 
   help-and-status:
     name: Help and Status Commands
@@ -60,7 +49,6 @@ jobs:
         with:
           path: |
             /usr/local/bin/packer
-            /usr/local/bin/tofu
           key: tools-${{ runner.os }}-v1
           
       - name: Test Help Command
@@ -81,7 +69,6 @@ jobs:
         with:
           path: |
             /usr/local/bin/packer
-            /usr/local/bin/tofu
           key: tools-${{ runner.os }}-v1
           
       - name: Initialize Packer
@@ -93,42 +80,11 @@ jobs:
       - name: Test Provision Script Check
         run: make test-provision-script
 
-  opentofu-validation:
-    name: OpenTofu Configuration Tests
-    runs-on: ubuntu-latest
-    needs: setup-tools
-    env:
-      PATH: /usr/local/bin:$PATH
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Restore Tools Cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            /usr/local/bin/packer
-            /usr/local/bin/tofu
-          key: tools-${{ runner.os }}-v1
-          
-      - name: Initialize OpenTofu
-        run: make tofu-init
-        
-      - name: Validate OpenTofu Configuration
-        run: make tofu-validate
-        
-      - name: Format Check OpenTofu
-        run: make tofu-fmt
-        
-      - name: Test OpenTofu Plan (without AWS credentials)
-        run: make tofu-plan || echo "Plan failed without AWS credentials (expected)"
-        continue-on-error: true
 
   logs-and-output:
     name: Logs and Output Tests
     runs-on: ubuntu-latest
     needs: setup-tools
-    env:
-      PATH: /usr/local/bin:$PATH
     steps:
       - uses: actions/checkout@v4
       
@@ -137,29 +93,16 @@ jobs:
         with:
           path: |
             /usr/local/bin/packer
-            /usr/local/bin/tofu
           key: tools-${{ runner.os }}-v1
           
       - name: Test AMI Logs (Expected to show no logs message)
         run: make ami-logs
         
-      - name: Test OpenTofu Logs
-        run: make tofu-logs || echo "No OpenTofu logs found (expected)"
-        continue-on-error: true
-        
-      - name: Initialize OpenTofu for Output Test
-        run: make tofu-init
-        
-      - name: Test OpenTofu Output
-        run: make tofu-output || echo "No outputs available (expected)"
-        continue-on-error: true
 
   setup-integration:
     name: Setup Integration Test
     runs-on: ubuntu-latest
     needs: setup-tools
-    env:
-      PATH: /usr/local/bin:$PATH
     steps:
       - uses: actions/checkout@v4
       
@@ -168,7 +111,6 @@ jobs:
         with:
           path: |
             /usr/local/bin/packer
-            /usr/local/bin/tofu
           key: tools-${{ runner.os }}-v1
           
       - name: Test Setup Command (Will fail on AWS check, but tests other components)
@@ -180,8 +122,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: setup-tools
     if: github.event_name == 'workflow_dispatch' # Only run on manual trigger
-    env:
-      PATH: /usr/local/bin:$PATH
     steps:
       - uses: actions/checkout@v4
       
@@ -190,8 +130,5 @@ jobs:
         with:
           path: |
             /usr/local/bin/packer
-            /usr/local/bin/tofu
           key: tools-${{ runner.os }}-v1
           
-      - name: Initialize OpenTofu
-        run: make tofu-init
