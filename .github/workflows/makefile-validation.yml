@@ -24,7 +24,6 @@ jobs:
           path: |
             /usr/local/bin/packer
             /usr/local/bin/tofu
-            /usr/local/aws-cli/v2/current
           key: tools-${{ runner.os }}-v1
           
       - name: Install Packer
@@ -33,13 +32,6 @@ jobs:
           curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
           sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
           sudo apt-get update && sudo apt-get install packer
-          
-      - name: Install AWS CLI
-        if: steps.cache-tools.outputs.cache-hit != 'true'
-        run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip -q awscliv2.zip
-          sudo ./aws/install
           
       - name: Install OpenTofu
         if: steps.cache-tools.outputs.cache-hit != 'true'
@@ -66,7 +58,6 @@ jobs:
           path: |
             /usr/local/bin/packer
             /usr/local/bin/tofu
-            /usr/local/bin/aws
           key: tools-${{ runner.os }}-v1
           
       - name: Test Help Command
@@ -88,7 +79,6 @@ jobs:
           path: |
             /usr/local/bin/packer
             /usr/local/bin/tofu
-            /usr/local/bin/aws
           key: tools-${{ runner.os }}-v1
           
       - name: Initialize Packer
@@ -113,7 +103,6 @@ jobs:
           path: |
             /usr/local/bin/packer
             /usr/local/bin/tofu
-            /usr/local/bin/aws
           key: tools-${{ runner.os }}-v1
           
       - name: Initialize OpenTofu
@@ -142,7 +131,6 @@ jobs:
           path: |
             /usr/local/bin/packer
             /usr/local/bin/tofu
-            /usr/local/bin/aws
           key: tools-${{ runner.os }}-v1
           
       - name: Test AMI Logs (Expected to show no logs message)
@@ -172,7 +160,6 @@ jobs:
           path: |
             /usr/local/bin/packer
             /usr/local/bin/tofu
-            /usr/local/bin/aws
           key: tools-${{ runner.os }}-v1
           
       - name: Test Setup Command (Will fail on AWS check, but tests other components)
@@ -193,7 +180,6 @@ jobs:
           path: |
             /usr/local/bin/packer
             /usr/local/bin/tofu
-            /usr/local/bin/aws
           key: tools-${{ runner.os }}-v1
           
       - name: Initialize OpenTofu
