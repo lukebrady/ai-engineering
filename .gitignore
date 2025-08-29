@@ -41,6 +41,16 @@ Thumbs.db
 *.swo
 *~
 
+# Pyh
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+.gradio/
+.venv/
+
 # Terraform/OpenTofu files
 *.tfstate
 *.tfstate.*
