@@ -4,6 +4,7 @@
 PACKER_DIR := infrastructure/ai-inference/packer
 PACKER_CONFIG := $(PACKER_DIR)
 PACKER_LOG_FILE := $(PACKER_DIR)/packer-build.log
+TEMPORAL_DIR := infrastructure/temporal
 
 # Default values
 AWS_REGION ?= us-east-1
@@ -27,6 +28,9 @@ help: ## Show this help message
 	@echo ""
 	@echo "$(YELLOW)Agent Commands:$(NC)"
 	@awk 'BEGIN {FS = ":.*?## "} /^agent-.*:.*?## / {printf "  $(GREEN)%-25s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
+	@echo ""
+	@echo "$(YELLOW)Temporal Commands:$(NC)"
+	@awk 'BEGIN {FS = ":.*?## "} /^temporal-.*:.*?## / {printf "  $(GREEN)%-25s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 	@echo ""
 	@echo "$(YELLOW)Infrastructure/OpenTofu Commands:$(NC)"
 	@awk 'BEGIN {FS = ":.*?## "} /^tofu-.*:.*?## / {printf "  $(GREEN)%-25s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
@@ -236,6 +240,47 @@ agent-oss-check: ## Check OSS agent environment and dependencies
 	@cd agents/oss-agent && python -c "import openai, wikipedia, rich, pydantic; print('All dependencies available')" || echo "$(RED)Missing dependencies. Run 'make agent-oss-install'$(NC)"
 	@echo "$(BLUE)Environment variables:$(NC)"
 	@echo "  API_ENDPOINT: ${API_ENDPOINT:-Not set}"
+
+# Temporal Docker Compose commands
+.PHONY: temporal-up
+temporal-up: ## Start Temporal Docker Compose stack
+	@echo "$(BLUE)Starting Temporal Docker Compose stack...$(NC)"
+	@cd $(TEMPORAL_DIR) && docker compose --env-file config.env up -d
+	@echo "$(GREEN)Temporal stack started! Check http://localhost:8080 for Web UI$(NC)"
+
+.PHONY: temporal-down
+temporal-down: ## Stop and remove Temporal Docker Compose stack
+	@echo "$(BLUE)Stopping and removing Temporal Docker Compose stack...$(NC)"
+	@cd $(TEMPORAL_DIR) && docker compose --env-file config.env down
+	@echo "$(GREEN)Temporal stack stopped and removed!$(NC)"
+
+.PHONY: temporal-stop
+temporal-stop: ## Stop Temporal Docker Compose stack (without removing)
+	@echo "$(BLUE)Stopping Temporal Docker Compose stack...$(NC)"
+	@cd $(TEMPORAL_DIR) && docker compose --env-file config.env stop
+	@echo "$(GREEN)Temporal stack stopped!$(NC)"
+
+.PHONY: temporal-start
+temporal-start: ## Start existing Temporal Docker Compose stack
+	@echo "$(BLUE)Starting Temporal Docker Compose stack...$(NC)"
+	@cd $(TEMPORAL_DIR) && docker compose --env-file config.env start
+	@echo "$(GREEN)Temporal stack started!$(NC)"
+
+.PHONY: temporal-restart
+temporal-restart: ## Restart Temporal Docker Compose stack
+	@echo "$(BLUE)Restarting Temporal Docker Compose stack...$(NC)"
+	@cd $(TEMPORAL_DIR) && docker compose --env-file config.env restart
+	@echo "$(GREEN)Temporal stack restarted!$(NC)"
+
+.PHONY: temporal-logs
+temporal-logs: ## Show logs from Temporal Docker Compose stack
+	@echo "$(BLUE)Showing Temporal Docker Compose logs...$(NC)"
+	@cd $(TEMPORAL_DIR) && docker compose --env-file config.env logs -f
+
+.PHONY: temporal-status
+temporal-status: ## Show status of Temporal Docker Compose stack
+	@echo "$(BLUE)Temporal Docker Compose status:$(NC)"
+	@cd $(TEMPORAL_DIR) && docker compose --env-file config.env ps
 
 .PHONY: ami-clean
 ami-clean: ## Clean up build artifacts and logs
