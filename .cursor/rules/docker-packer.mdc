@@ -1,0 +1,36 @@
+---
+globs: docker/**,infrastructure/ai-inference/packer/**
+---
+# Docker and Packer Conventions
+
+## Docker
+
+- **Chromium image**: Build from [`docker/chromium/Dockerfile`](mdc:docker/chromium/Dockerfile). Entrypoint script at [`docker/chromium/entrypoint.sh`](mdc:docker/chromium/entrypoint.sh).
+
+- **Build**:
+
+```bash
+docker build -t ai-eng-chromium:latest docker/chromium
+```
+
+- **Run**:
+
+```bash
+docker run --rm -it ai-eng-chromium:latest
+```
+
+## Packer (AMI or machine image)
+
+- **Location**: [`infrastructure/ai-inference/packer`](mdc:infrastructure/ai-inference/packer)
+- **Files**: `build.pkr.hcl`, `variables.pkr.hcl`, `sources.pkr.hcl`, `plugins.pkr.hcl`, `scripts/provision.sh`
+
+- **Validate & Build**:
+
+```bash
+cd infrastructure/ai-inference/packer
+packer init .
+packer validate .
+packer build -var-file=variables.pkr.hcl build.pkr.hcl
+```
+
+- **Provisioning**: Keep bootstrap logic in [`scripts/provision.sh`](mdc:infrastructure/ai-inference/packer/scripts/provision.sh). Keep scripts idempotent.

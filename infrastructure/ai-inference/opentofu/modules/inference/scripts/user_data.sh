@@ -30,9 +30,9 @@ Requires=docker.service
 Type=simple
 Restart=always
 RestartSec=10
-TimeoutStartSec=360
+TimeoutStartSec=${vllm_timeout}
 User=root
-ExecStartPre=/usr/bin/docker pull vllm/vllm-openai:latest
+ExecStartPre=/usr/bin/docker pull vllm/vllm-openai:${vllm_version}
 ExecStartPre=-/usr/bin/docker stop vllm-server
 ExecStartPre=-/usr/bin/docker rm vllm-server
 ExecStart=/usr/bin/docker run --runtime nvidia --gpus all \
@@ -41,8 +41,8 @@ ExecStart=/usr/bin/docker run --runtime nvidia --gpus all \
     -p 8000:8000 \
     --ipc=host \
     --name vllm-server \
-    vllm/vllm-openai:latest \
-    --model ${model}
+    vllm/vllm-openai:${vllm_version} \
+    --model ${model} ${vllm_args}
 ExecStop=/usr/bin/docker stop vllm-server
 ExecStopPost=-/usr/bin/docker rm vllm-server
 

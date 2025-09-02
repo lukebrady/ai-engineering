@@ -1,0 +1,35 @@
+---
+alwaysApply: true
+---
+# Project Structure
+
+## Overview
+
+- **Monorepo root**: `/Users/luke/Desktop/software/ai-engineering`
+- **Agents**: `agents/`
+  - **OSS Agent**: [`agents/oss-agent/main.py`](mdc:agents/oss-agent/main.py)
+  - **Shared Tools**: [`agents/tools/tools.py`](mdc:agents/tools/tools.py)
+- **AI Inference Infra**: `infrastructure/ai-inference/`
+  - **OpenTofu/Terraform**: [`infrastructure/ai-inference/opentofu`](mdc:infrastructure/ai-inference/opentofu)
+    - Environments: `iam/`, `inference/`
+    - Reusable module: [`modules/inference`](mdc:infrastructure/ai-inference/opentofu/modules/inference)
+  - **Packer**: [`infrastructure/ai-inference/packer`](mdc:infrastructure/ai-inference/packer)
+- **Temporal Dev Stack**: [`infrastructure/temporal`](mdc:infrastructure/temporal)
+- **Docker**: [`docker/`](mdc:docker)
+- **Top-level Docs**: [`README.md`](mdc:README.md), [`AGENTS.md`](mdc:AGENTS.md)
+- **Automation**: [`Makefile`](mdc:Makefile)
+
+## Entrypoints
+
+- **Python OSS Agent**: run via `python agents/oss-agent/main.py`
+- **OpenTofu**: run from `infrastructure/ai-inference/opentofu/` directories with `tofu init/plan/apply`
+- **Packer**: run from `infrastructure/ai-inference/packer` with `packer build -var-file=variables.pkr.hcl build.pkr.hcl`
+- **Temporal**: run `docker-compose up -d` in [`infrastructure/temporal`](mdc:infrastructure/temporal/docker-compose.yml)
+- **Docker Chromium image**: build from [`docker/chromium`](mdc:docker/chromium/Dockerfile)
+- **Makefile**: use phony targets for infra workflows where available
+
+## Conventions
+
+- Use absolute paths in tool calls when possible.
+- Keep environment-specific state inside each OpenTofu env directory.
+- Prefer reusable modules in `modules/` over copy-paste.
