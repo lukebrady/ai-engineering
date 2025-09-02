@@ -1,0 +1,34 @@
+---
+globs: **/infrastructure/ai-inference/opentofu/**/*.tf,**/infrastructure/ai-inference/opentofu/**/*.tfvars
+---
+# OpenTofu/Terraform Conventions
+
+- **State and environment separation**: Each environment directory (e.g., `iam/`, `inference/`) maintains its own backend/state. Do not share state files across envs.
+- **Modules**: Prefer [`modules/inference`](mdc:infrastructure/ai-inference/opentofu/modules/inference) for EC2/inference resources.
+- **Variable definitions**: Declare in `variables.tf`; pass via `*.tfvars` files and CLI flags. Sensitive values go in `secure.tfvars` (do not commit secrets).
+- **Providers**: Centralize provider configuration in `providers.tf` at env root; modules receive providers via `required_providers` and `providers` blocks.
+- **Outputs**: Expose only necessary outputs in `outputs.tf`, avoid leaking secrets.
+- **User data**: Use module script [`scripts/user_data.sh`](mdc:infrastructure/ai-inference/opentofu/modules/inference/scripts/user_data.sh) rather than duplicating in envs.
+- **Naming**: Use consistent resource name prefixes based on `var.project`, `var.environment`, and `var.region`.
+- **Plans**: Run `tofu fmt -recursive`, `tofu validate`, then `tofu plan` before `apply`.
+
+## Typical workflow
+
+```bash
+cd infrastructure/ai-inference/opentofu/inference
+export TF_VAR_environment=dev
+export TF_VAR_project=ai-engineering
+# Initialize (or reconfigure) backend and providers
+tofu init -reconfigure
+# Format and validate
+tofu fmt -recursive && tofu validate
+# Plan with secure vars
+tofu plan -var-file=secure.tfvars | tee plan.out
+# Apply with same vars
+tofu apply -auto-approve -var-file=secure.tfvars
+```
+
+## Lint & style
+
+- Run `tofu fmt -recursive` before committing.
+- Keep files short and organized: `main.tf`, `variables.tf`, `outputs.tf`, and split `data.tf` as needed.

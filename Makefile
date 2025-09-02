@@ -171,15 +171,31 @@ tofu-inference-output: ## Show OpenTofu inference outputs
 	@echo "$(BLUE)Showing OpenTofu inference outputs...$(NC)"
 	@cd infrastructure/ai-inference/opentofu/inference && tofu output
 
+# OpenTofu commands - Modules
+.PHONY: tofu-modules-init
+tofu-modules-init: ## Initialize OpenTofu modules (for development)
+	@echo "$(BLUE)Initializing OpenTofu modules...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/modules/inference && tofu init
+
+.PHONY: tofu-modules-validate
+tofu-modules-validate: ## Validate OpenTofu modules
+	@echo "$(BLUE)Validating OpenTofu modules...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/modules/inference && tofu validate
+
+.PHONY: tofu-modules-fmt
+tofu-modules-fmt: ## Format OpenTofu module files
+	@echo "$(BLUE)Formatting OpenTofu module files...$(NC)"
+	@cd infrastructure/ai-inference/opentofu/modules/inference && tofu fmt
+
 # OpenTofu commands - All Modules
 .PHONY: tofu-init
 tofu-init: tofu-iam-init tofu-inference-init ## Initialize all OpenTofu modules
 
 .PHONY: tofu-validate
-tofu-validate: tofu-iam-validate tofu-inference-validate ## Validate all OpenTofu modules
+tofu-validate: tofu-iam-validate tofu-inference-validate tofu-modules-validate ## Validate all OpenTofu modules
 
 .PHONY: tofu-fmt
-tofu-fmt: tofu-iam-fmt tofu-inference-fmt ## Format all OpenTofu configuration files
+tofu-fmt: tofu-iam-fmt tofu-inference-fmt tofu-modules-fmt ## Format all OpenTofu configuration files
 
 .PHONY: tofu-plan
 tofu-plan: tofu-iam-plan tofu-inference-plan ## Show deployment plan for all modules

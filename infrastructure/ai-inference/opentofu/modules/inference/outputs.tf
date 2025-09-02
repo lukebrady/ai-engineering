@@ -2,31 +2,31 @@
 
 output "instance_id" {
   description = "ID of the AI inference server instance"
-  value       = module.qwen3_0_6b.instance_id
+  value       = aws_instance.this.id
 }
 
 output "public_ip" {
   description = "Public IP address of the AI inference server"
-  value       = module.qwen3_0_6b.public_ip
+  value       = var.create_eip ? aws_eip.this[0].public_ip : aws_instance.this.public_ip
 }
 
 output "private_ip" {
   description = "Private IP address of the AI inference server"
-  value       = module.qwen3_0_6b.private_ip
+  value       = aws_instance.this.private_ip
 }
 
 output "instance_arn" {
   description = "ARN of the AI inference server instance"
-  value       = module.qwen3_0_6b.instance_arn
+  value       = aws_instance.this.arn
 }
 
 output "ssh_key_name" {
   description = "Name of the SSH key pair used for the instance"
-  value       = module.qwen3_0_6b.ssh_key_name
+  value       = aws_key_pair.this.key_name
 }
 
 output "ssh_private_key_file" {
   description = "Path to the private SSH key file"
-  value       = module.qwen3_0_6b.ssh_private_key_file
+  value       = local_file.private_key.filename
   sensitive   = true
 }

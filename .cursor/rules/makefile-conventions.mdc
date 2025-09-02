@@ -1,0 +1,19 @@
+---
+globs: Makefile
+---
+# Makefile Conventions
+
+- **Single source of truth**: Use the top-level [`Makefile`](mdc:Makefile) for common workflows (infra, build, run).
+- **Phony targets**: Targets should be phony unless they produce files. Group by domain (infra, docker, packer, tofu).
+- **Parameters**: Use environment variables to parameterize targets (e.g., `ENV`, `REGION`, `PROJECT`). Provide sensible defaults.
+- **Help**: Maintain a `help` target that documents available commands.
+- **Idempotency**: Targets should be safe to re-run. Avoid hidden state.
+
+## Examples
+
+```bash
+make help
+make tofu-init ENV=dev DIR=infrastructure/ai-inference/opentofu/inference
+make tofu-plan ENV=dev DIR=infrastructure/ai-inference/opentofu/inference VARS=secure.tfvars
+make packer-build
+```

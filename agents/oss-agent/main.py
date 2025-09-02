@@ -39,7 +39,7 @@ load_dotenv(dotenv_path=".env.secure")
 client = OpenAI(api_key="", base_url=f"http://{os.getenv('API_ENDPOINT')}:8000/v1")
 
 # Specify the model name - this should match what's loaded in your model server
-model = "Qwen/Qwen3-0.6B"
+model = "openai/gpt-oss-20b"
 
 
 # Define the input schema for our tool using Pydantic
@@ -116,7 +116,7 @@ def main():
             model=model,
             messages=messages,
             tools=[tool_definitions],  # List of available tools
-            tool_choice="auto",    # Force tool usage (optional)
+            tool_choice="auto", # Let the model decide whether to use a tool
         )
         
         # Add the model's response to our message history

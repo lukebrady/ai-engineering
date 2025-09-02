@@ -33,7 +33,9 @@ ai-engineering/
 │       ├── packer/             # Custom Ubuntu 24.04 AMI builder with GPU support
 │       └── opentofu/           # Modular Infrastructure as Code deployment
 │           ├── iam/            # IAM roles and permissions
-│           └── inference/      # EC2 instances and vLLM service
+│           ├── inference/      # Main deployment using modular components
+│           └── modules/        # Reusable Terraform modules
+│               └── inference/  # Parameterized inference server module
 └── intro-langgraph/            # (Planned) LangGraph learning project
 ```
 
@@ -73,10 +75,11 @@ A complete infrastructure solution for deploying AI inference workloads on AWS u
 **Key Features:**
 
 - Custom Ubuntu 24.04 AMI with Docker, NVIDIA drivers, and GPU support
-- Modular deployment: separate IAM and inference components
+- Modular architecture: separate IAM, inference, and reusable modules
+- Multi-model deployment: Qwen 3 0.6B and GPT-OSS 20B configurations
 - vLLM server with systemd integration and container lifecycle management
-- GPU-enabled instances (g5.2xlarge with L4 equivalent)
-- Automated provisioning with security best practices
+- GPU-enabled instances (g5.2xlarge) with automated provisioning
+- Comprehensive security: EBS encryption, restrictive security groups, IAM best practices
 
 **Quick Deploy:**
 
@@ -232,6 +235,7 @@ brew install awscli packer opentofu
 Each subproject contains detailed documentation:
 
 - [`infrastructure/ai-inference/packer/README.md`](infrastructure/ai-inference/packer/README.md) - AMI building guide
+- [`infrastructure/ai-inference/opentofu/README.md`](infrastructure/ai-inference/opentofu/README.md) - Complete infrastructure deployment guide
 - [`agents/oss-agent/main.py`](agents/oss-agent/main.py) - Comprehensive agent implementation with inline documentation
 
 ## 🤝 Contributing

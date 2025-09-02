@@ -1,0 +1,21 @@
+---
+globs: agents/**/*.py
+---
+# Python Conventions for Agents
+
+## Guidelines
+
+- **Packaging**: Use [`agents/oss-agent/pyproject.toml`](mdc:agents/oss-agent/pyproject.toml) for dependencies and tooling. Prefer `uv` or `pipx` for isolated installs.
+- **Entry point**: [`agents/oss-agent/main.py`](mdc:agents/oss-agent/main.py) is the primary runner. Keep side effects behind `if __name__ == "__main__":`.
+- **Type hints**: Use typing for public functions and dataclasses where helpful. Run `pyright` or `mypy` if configured.
+- **Logging**: Use `logging` module; avoid print in library code.
+- **Exceptions**: Raise specific exceptions; avoid bare `except`.
+- **Structure**: Keep reusable utilities in [`agents/tools/tools.py`](mdc:agents/tools/tools.py). Avoid circular imports.
+- **Style**: Follow PEP8. Run `ruff`/`black` if configured; otherwise respect existing style.
+- **Testing**: Prefer `pytest` style tests colocated under `tests/` directories when present.
+
+## Typical run
+
+```bash
+uv run python agents/oss-agent/main.py
+```
