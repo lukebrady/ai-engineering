@@ -76,7 +76,7 @@ A complete infrastructure solution for deploying AI inference workloads on AWS u
 
 - Custom Ubuntu 24.04 AMI with Docker, NVIDIA drivers, and GPU support
 - Modular architecture: separate IAM, inference, and reusable modules
-- Multi-model deployment: Qwen 3 0.6B and GPT-OSS 20B configurations
+- Multi-model deployment: Qwen 3 0.6B, GPT-OSS 20B, and Gemma 3 27B configurations
 - vLLM server with systemd integration and container lifecycle management
 - GPU-enabled instances (g5.2xlarge) with automated provisioning
 - Comprehensive security: EBS encryption, restrictive security groups, IAM best practices
