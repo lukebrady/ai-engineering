@@ -1,15 +1,27 @@
 import os
 import dotenv
-import datetime
 
 dotenv.load_dotenv(dotenv_path=".env.secure")
 
 from huggingface_hub import login
-from smolagents import CodeAgent, DuckDuckGoSearchTool, InferenceClientModel, tool
+from langfuse import get_client
+from openinference.instrumentation.smolagents import SmolagentsInstrumentor
+from smolagents import CodeAgent, DuckDuckGoSearchTool, InferenceClientModel, ToolCallingAgent, tool
 
 
 HUGGING_FACE_TOKEN = os.getenv("HUGGING_FACE_TOKEN")
+
 login(token=HUGGING_FACE_TOKEN)
+
+langfuse_client = get_client()
+
+
+if langfuse_client.auth_check():
+    print("Langfuse client authenticated")
+else:
+    print("Langfuse client not authenticated")
+
+SmolagentsInstrumentor().instrument()
 
 
 @tool
@@ -37,7 +49,7 @@ def music_agent():
     prompt = """
     Search for the best music recommendations for a Bruce Wayne's party.
     """
-    return CodeAgent(
+    return ToolCallingAgent(
         model=InferenceClientModel(),
         tools=[DuckDuckGoSearchTool()],
     ).run(prompt)
@@ -49,7 +61,7 @@ def menu_agent():
     """
     return CodeAgent(
         model=InferenceClientModel(),
-        tools=[DuckDuckGoSearchTool(), suggest_menu],
+        tools=[suggest_menu],
     ).run(prompt)
 
 
