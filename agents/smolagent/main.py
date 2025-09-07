@@ -6,7 +6,13 @@ dotenv.load_dotenv(dotenv_path=".env.secure")
 from huggingface_hub import login
 from langfuse import get_client
 from openinference.instrumentation.smolagents import SmolagentsInstrumentor
-from smolagents import CodeAgent, DuckDuckGoSearchTool, InferenceClientModel, ToolCallingAgent, tool
+from smolagents import (
+    CodeAgent,
+    DuckDuckGoSearchTool,
+    InferenceClientModel,
+    ToolCallingAgent,
+    tool,
+)
 
 
 HUGGING_FACE_TOKEN = os.getenv("HUGGING_FACE_TOKEN")
