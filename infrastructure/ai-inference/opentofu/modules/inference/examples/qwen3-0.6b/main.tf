@@ -1,5 +1,5 @@
 module "qwen3_0_6b" {
-  source = "../../../"
+  source = "../../"
 
   ami_id               = data.aws_ami.ai_inference.id
   vpc_id               = data.aws_vpc.default.id

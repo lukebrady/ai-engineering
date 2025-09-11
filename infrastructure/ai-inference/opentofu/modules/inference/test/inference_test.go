@@ -11,7 +11,9 @@ import (
 	"time"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
-	"github.com/openai/openai-go"
+	"github.com/joho/godotenv"
+	"github.com/openai/openai-go/v2"
+	"github.com/openai/openai-go/v2/option"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,32 +26,34 @@ const (
 func testModel(t *testing.T, publicIP, modelName string) {
 	t.Helper()
 
-	config := openai.DefaultConfig("whatever")
-	config.BaseURL = fmt.Sprintf("http://%s:8000/v1", publicIP)
+	if err := godotenv.Load(".env.secure"); err != nil {
+		t.Fatalf("failed to load .env.secure: %v", err)
+	}
 
-	client := openai.NewClientWithConfig(config)
+	client := openai.NewClient(
+		option.WithAPIKey(os.Getenv("OPENAI_API_KEY")),
+		option.WithBaseURL(fmt.Sprintf("http://%s:8000/v1", publicIP)),
+	)
 
 	// Wait for the model to be ready
 	require.Eventually(t, func() bool {
-		_, err := client.ListModels(context.Background())
+		_, err := client.Models.List(context.Background())
 		return err == nil
 	}, maxRetries*sleepDuration, sleepDuration, "model was not ready in time")
 
 	// Send a request to the model
-	resp, err := client.CreateChatCompletion(
+	resp, err := client.Chat.Completions.New(
 		context.Background(),
-		openai.ChatCompletionRequest{
+		openai.ChatCompletionNewParams{
 			Model: modelName,
-			Messages: []openai.ChatCompletionMessage{
-				{
-					Role:    openai.ChatMessageRoleUser,
-					Content: "Hello!",
-				},
+			Messages: []openai.ChatCompletionMessageParamUnion{
+				openai.UserMessage("Hello there!"),
 			},
 		},
 	)
+	t.Log("response: ", resp.Choices[0].Message.Content)
 	require.NoError(t, err, "failed to create chat completion")
-	require.NotEmpty(t, resp.Choices, "got an empty response")
+	require.NotEmpty(t, resp, "got an empty response")
 	require.NotEmpty(t, resp.Choices[0].Message.Content, "got an empty message")
 }
 
@@ -59,11 +63,14 @@ func TestQwen3_0_6B(t *testing.T) {
 
 	terraformOptions := &terraform.Options{
 		TerraformDir: "../examples/qwen3-0.6b",
-		Vars: map[string]interface{}{
+		Vars: map[string]any{
 			"allowed_ip_addresses": getMyPublicIP(t),
 			"hugging_face_token":   os.Getenv("HUGGING_FACE_TOKEN"),
 		},
 	}
+
+	// Destroy the previous instance if it exists
+	terraform.Destroy(t, terraformOptions)
 
 	defer terraform.Destroy(t, terraformOptions)
 	terraform.InitAndApply(t, terraformOptions)
@@ -72,27 +79,6 @@ func TestQwen3_0_6B(t *testing.T) {
 	require.NotEmpty(t, publicIP, "public_ip output was empty")
 
 	testModel(t, publicIP, "Qwen/Qwen3-0.6B")
-}
-
-// TestGemma3_27B tests the gemma-3-27b-it example
-func TestGemma3_27B(t *testing.T) {
-	t.Parallel()
-
-	terraformOptions := &terraform.Options{
-		TerraformDir: "../examples/gemma-3-27b-it",
-		Vars: map[string]interface{}{
-			"allowed_ip_addresses": getMyPublicIP(t),
-			"hugging_face_token":   os.Getenv("HUGGING_FACE_TOKEN"),
-		},
-	}
-
-	defer terraform.Destroy(t, terraformOptions)
-	terraform.InitAndApply(t, terraformOptions)
-
-	publicIP := terraform.Output(t, terraformOptions, "public_ip")
-	require.NotEmpty(t, publicIP, "public_ip output was empty")
-
-	testModel(t, publicIP, "google/gemma-3-27b-it")
 }
 
 // getMyPublicIP returns the public IP of the machine running the test

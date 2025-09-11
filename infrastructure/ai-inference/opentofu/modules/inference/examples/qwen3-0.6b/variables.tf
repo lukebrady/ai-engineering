@@ -1,7 +1,7 @@
 variable "ami_name_prefix" {
   description = "Prefix for the AMI name"
   type        = string
-  default     = "ai-inference-ubuntu-24-04"
+  default     = "ubuntu-24.04-ai-inference"
 }
 
 variable "allowed_ip_addresses" {
