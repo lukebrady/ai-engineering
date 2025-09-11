@@ -1,0 +1,11 @@
+[project]
+name = "tofumatic"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "colorama>=0.4.6",
+    "dotenv>=0.9.9",
+    "openai>=1.102.0",
+]
