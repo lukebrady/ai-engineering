@@ -5,9 +5,8 @@ module "kubernetes" {
   # Required variables
   cluster_name             = var.cluster_name
   vpc_id                   = var.vpc_id
-  control_plane_subnet_ids = 
+  control_plane_subnet_ids = data.aws_subnets.control_plane.ids
   worker_subnet_ids        = data.aws_subnets.worker.ids
-  ssh_key_name             = var.ssh_key_name
   region                   = var.aws_region
 
   # Optional customizations

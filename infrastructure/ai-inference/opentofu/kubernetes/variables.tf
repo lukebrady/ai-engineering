@@ -9,15 +9,10 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "ssh_key_name" {
-  description = "Name of the EC2 key pair for SSH access"
-  type        = string
-}
-
 variable "aws_region" {
   description = "AWS region for deployment"
   type        = string
-  default     = "us-west-2"
+  default     = "us-east-1"
 }
 
 # Optional Variables with Defaults
