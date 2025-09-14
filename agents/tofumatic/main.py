@@ -29,25 +29,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def retry_with_backoff(max_retries: int = 3, base_delay: float = 1.0):
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            for attempt in range(max_retries):
-                try:
-                    return func(*args, **kwargs)
-                except Exception as e:
-                    if attempt == max_retries - 1:
-                        logger.error(f"Function {func.__name__} failed after {max_retries} attempts: {e}")
-                        raise
-                    
-                    delay = base_delay * (2 ** attempt)
-                    logger.warning(f"Attempt {attempt + 1} failed for {func.__name__}: {e}. Retrying in {delay}s...")
-                    time.sleep(delay)
-            return None
-        return wrapper
-    return decorator
-
 def validate_json_response(response: str, expected_keys: Optional[List[str]] = None) -> Optional[Dict]:
     try:
         data = json.loads(response)
@@ -68,7 +49,6 @@ client = OpenAI(
     base_url="https://api.x.ai/v1",
 )
 
-@retry_with_backoff(max_retries=3, base_delay=1.0)
 def prompt_agent(prompt: str) -> Optional[Dict]:
     logger.info(f"Starting prompt_agent with input: {prompt[:100]}...")
     prompt_response = ""
@@ -105,14 +85,13 @@ def prompt_agent(prompt: str) -> Optional[Dict]:
         logger.error(f"Error in prompt_agent: {e}")
         raise
 
-@retry_with_backoff(max_retries=3, base_delay=1.0)
 def code_planning_agent(project_description: str) -> List[Dict]:
     logger.info(f"Starting code_planning_agent with description: {project_description[:100]}...")
     code_plan = ""
     
     try:
         response = client.chat.completions.create(
-            model="grok-code-fast-1",
+            model="grok-4-0709",
             messages=[
                 {"role": "system", "content": CODE_PLANNING_PROMPT},
                 {"role": "user", "content": project_description},
@@ -162,7 +141,6 @@ def code_planning_agent(project_description: str) -> List[Dict]:
         logger.error(f"Error in code_planning_agent: {e}")
         raise
 
-@retry_with_backoff(max_retries=2, base_delay=1.0)
 def infrastructure_engineer_agent(code_plan: List[Dict]) -> bool:
     logger.info(f"Starting infrastructure_engineer_agent with {len(code_plan)} steps")
     
