@@ -1,7 +1,7 @@
 import os
 import dotenv
 
-dotenv.load_dotenv(dotenv_path=".env.secure")
+dotenv.load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "../.env.secure"))
 
 from huggingface_hub import login
 from langfuse import get_client

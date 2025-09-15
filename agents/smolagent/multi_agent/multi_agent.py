@@ -1,7 +1,12 @@
 import os
 
 from PIL import Image
-from smolagents import CodeAgent, DuckDuckGoSearchTool, InferenceClientModel, VisitWebpageTool
+from smolagents import (
+    CodeAgent,
+    DuckDuckGoSearchTool,
+    InferenceClientModel,
+    VisitWebpageTool,
+)
 from smolagents.models import OpenAIServerModel
 from smolagents.utils import encode_image_base64, make_image_url
 from tools import calculate_cargo_travel_time
@@ -23,6 +28,8 @@ web_agent = CodeAgent(
     verbosity_level=0,
     max_steps=10,
 )
+
+
 def check_reasoning_and_plot(final_answer, agent_memory):
     multimodal_model = OpenAIServerModel("gpt-4o", max_tokens=8096)
     filepath = "saved_map.png"
@@ -58,7 +65,9 @@ def check_reasoning_and_plot(final_answer, agent_memory):
 
 
 manager_agent = CodeAgent(
-    model=InferenceClientModel("deepseek-ai/DeepSeek-R1", provider="together", max_tokens=8096),
+    model=InferenceClientModel(
+        "deepseek-ai/DeepSeek-R1", provider="together", max_tokens=8096
+    ),
     tools=[calculate_cargo_travel_time],
     managed_agents=[web_agent],
     additional_authorized_imports=[
@@ -76,7 +85,8 @@ manager_agent = CodeAgent(
 )
 
 manager_agent.visualize()
-manager_agent.run("""
+manager_agent.run(
+    """
 Find all Batman filming locations in the world, calculate the time to transfer via cargo plane to here (we're in Gotham, 40.7128° N, 74.0060° W).
 Also give me some supercar factories with the same cargo plane transfer time. You need at least 6 points in total.
 Represent this as spatial map of the world, with the locations represented as scatter points with a color that depends on the travel time, and save it to saved_map.png!
@@ -91,5 +101,6 @@ fig.write_image("saved_image.png")
 final_answer(fig)
 
 Never try to process strings using code: when you have a string to read, just print it and you'll see it.
-""")
+"""
+)
 manager_agent.python_executor.state["fig"]
