@@ -14,6 +14,7 @@ A lightweight, Alpine-based Chromium container for web automation and scraping.
 - **Features**: Headless mode, GUI mode with VNC, Python automation tools
 
 **Quick Start:**
+
 ```bash
 # Build the image
 docker build -t ai-engineering/chromium docker/chromium/
@@ -25,7 +26,9 @@ docker run -p 9222:9222 ai-engineering/chromium
 ## Design Principles
 
 ### Generic Containers
+
 These containers are designed to be:
+
 - **Reusable** across different projects and agents
 - **Lightweight** using Alpine Linux where possible
 - **Secure** running as non-root users
@@ -33,6 +36,7 @@ These containers are designed to be:
 - **Flexible** with configurable entrypoints
 
 ### Security Best Practices
+
 - Non-root user execution
 - Minimal package installation
 - Read-only filesystem support
@@ -41,7 +45,7 @@ These containers are designed to be:
 
 ### Container Organization
 
-```
+```text
 docker/
 ├── README.md              # This file
 └── chromium/             # Generic Chromium browser
@@ -54,6 +58,7 @@ docker/
 ## Future Containers
 
 Planned additions:
+
 - **PostgreSQL** - Database container for development
 - **Redis** - Caching and message broker
 - **Selenium Grid** - Distributed browser testing
@@ -114,7 +119,8 @@ docker build -t ai-engineering/chromium docker/chromium/
 When adding new containers:
 
 1. **Create directory structure**:
-   ```
+
+   ```text
    docker/<container-name>/
    ├── Dockerfile
    ├── .dockerignore
@@ -148,6 +154,7 @@ When adding new containers:
 ## Integration
 
 These containers integrate with:
+
 - **Agents** (`/agents/`) - Used by Python agents for browser automation
 - **Infrastructure** (`/infrastructure/`) - Referenced in docker-compose files
 - **CI/CD** (`.github/workflows/`) - Built and tested in pipelines
@@ -160,7 +167,7 @@ Add container commands to the main Makefile:
 # Docker commands
 .PHONY: docker-build-chromium
 docker-build-chromium: ## Build Chromium container
-	docker build -t ai-engineering/chromium docker/chromium/
+ docker build -t ai-engineering/chromium docker/chromium/
 
 .PHONY: docker-build-all
 docker-build-all: docker-build-chromium ## Build all containers
