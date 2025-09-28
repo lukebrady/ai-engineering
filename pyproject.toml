@@ -30,6 +30,9 @@ dependencies = [
     "llama-index-llms-huggingface-api>=0.6.1",
     "mcp[cli]>=1.15.0",
     "llama-index-utils-workflow>=0.4.1",
+    "langgraph>=0.6.7",
+    "langchain-openai>=0.3.33",
+    "langchain-core>=0.3.76",
 ]
 
 [tool.uv]
