@@ -72,3 +72,13 @@ scripts/temp/
 
 # Docker volumes
 volumes/
+
+# Images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.ico
+*.webp
