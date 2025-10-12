@@ -5,6 +5,7 @@ PACKER_DIR := infrastructure/ai-inference/packer
 PACKER_CONFIG := $(PACKER_DIR)
 PACKER_LOG_FILE := $(PACKER_DIR)/packer-build.log
 TEMPORAL_DIR := infrastructure/temporal
+N8N_DIR := infrastructure/n8n
 
 # Default values
 AWS_REGION ?= us-east-1
@@ -31,6 +32,9 @@ help: ## Show this help message
 	@echo ""
 	@echo "$(YELLOW)Temporal Commands:$(NC)"
 	@awk 'BEGIN {FS = ":.*?## "} /^temporal-.*:.*?## / {printf "  $(GREEN)%-25s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
+	@echo ""
+	@echo "$(YELLOW)n8n Commands:$(NC)"
+	@awk 'BEGIN {FS = ":.*?## "} /^n8n-.*:.*?## / {printf "  $(GREEN)%-25s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 	@echo ""
 	@echo "$(YELLOW)Infrastructure/OpenTofu Commands:$(NC)"
 	@awk 'BEGIN {FS = ":.*?## "} /^tofu-.*:.*?## / {printf "  $(GREEN)%-25s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
@@ -297,6 +301,47 @@ temporal-logs: ## Show logs from Temporal Docker Compose stack
 temporal-status: ## Show status of Temporal Docker Compose stack
 	@echo "$(BLUE)Temporal Docker Compose status:$(NC)"
 	@cd $(TEMPORAL_DIR) && docker compose --env-file config.env ps
+
+# n8n Docker Compose commands
+.PHONY: n8n-up
+n8n-up: ## Start n8n Docker Compose stack
+	@echo "$(BLUE)Starting n8n Docker Compose stack...$(NC)"
+	@cd $(N8N_DIR) && docker compose up -d
+	@echo "$(GREEN)n8n started! Access at http://localhost:5678$(NC)"
+
+.PHONY: n8n-down
+n8n-down: ## Stop and remove n8n Docker Compose stack
+	@echo "$(BLUE)Stopping and removing n8n Docker Compose stack...$(NC)"
+	@cd $(N8N_DIR) && docker compose down
+	@echo "$(GREEN)n8n stack stopped and removed!$(NC)"
+
+.PHONY: n8n-stop
+n8n-stop: ## Stop n8n Docker Compose stack (without removing)
+	@echo "$(BLUE)Stopping n8n Docker Compose stack...$(NC)"
+	@cd $(N8N_DIR) && docker compose stop
+	@echo "$(GREEN)n8n stopped!$(NC)"
+
+.PHONY: n8n-start
+n8n-start: ## Start existing n8n Docker Compose stack
+	@echo "$(BLUE)Starting n8n Docker Compose stack...$(NC)"
+	@cd $(N8N_DIR) && docker compose start
+	@echo "$(GREEN)n8n started!$(NC)"
+
+.PHONY: n8n-restart
+n8n-restart: ## Restart n8n Docker Compose stack
+	@echo "$(BLUE)Restarting n8n Docker Compose stack...$(NC)"
+	@cd $(N8N_DIR) && docker compose restart
+	@echo "$(GREEN)n8n restarted!$(NC)"
+
+.PHONY: n8n-logs
+n8n-logs: ## Show logs from n8n Docker Compose stack
+	@echo "$(BLUE)Showing n8n Docker Compose logs...$(NC)"
+	@cd $(N8N_DIR) && docker compose logs -f
+
+.PHONY: n8n-status
+n8n-status: ## Show status of n8n Docker Compose stack
+	@echo "$(BLUE)n8n Docker Compose status:$(NC)"
+	@cd $(N8N_DIR) && docker compose ps
 
 .PHONY: ami-clean
 ami-clean: ## Clean up build artifacts and logs
