@@ -257,6 +257,28 @@ agent-oss-check: ## Check OSS agent environment and dependencies
 	@echo "$(BLUE)Environment variables:$(NC)"
 	@echo "  API_ENDPOINT: ${API_ENDPOINT:-Not set}"
 
+.PHONY: agent-langchain-run
+agent-langchain-run: ## Run the LangChain sample agent
+	@echo "$(BLUE)Starting LangChain sample agent...$(NC)"
+	@echo "$(YELLOW)Make sure OPENAI_API_KEY is set$(NC)"
+	@cd agents/course/langchain && python main.py
+
+.PHONY: agent-langchain-install
+agent-langchain-install: ## Install LangChain sample dependencies
+	@echo "$(BLUE)Installing LangChain sample dependencies...$(NC)"
+	@cd agents/course/langchain && uv sync
+
+.PHONY: agent-langchain-check
+agent-langchain-check: ## Check LangChain sample environment and dependencies
+	@echo "$(BLUE)Checking LangChain sample environment...$(NC)"
+	@cd agents/course/langchain && python -c "import langchain, langchain_openai; print('All dependencies available')" || echo "$(RED)Missing dependencies. Run 'make agent-langchain-install'$(NC)"
+	@echo "$(BLUE)Environment variables:$(NC)"
+	@if [ -n "${OPENAI_API_KEY}" ]; then \
+		echo "  OPENAI_API_KEY: Set"; \
+	else \
+		echo "  OPENAI_API_KEY: Not set"; \
+	fi
+
 # Temporal Docker Compose commands
 .PHONY: temporal-up
 temporal-up: ## Start Temporal Docker Compose stack

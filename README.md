@@ -112,6 +112,22 @@ cd agents/oss-agent
 python main.py  # Interactive agent with Wikipedia search
 ```
 
+### 3. LangChain Sample Agent (`agents/course/langchain/`)
+
+A minimal LangChain agent example that demonstrates tool calling with a simple local toolset.
+
+**Key Features:**
+
+- `create_agent`-based setup with a compact, readable implementation
+- Built-in tools for arithmetic and UTC time lookup
+- CLI prompt override for easy experimentation
+
+**Quick Start:**
+
+```bash
+make agent-langchain-run
+```
+
 ## 🛠️ Technologies
 
 - **Infrastructure**: OpenTofu (Terraform), Packer, AWS (EC2, EBS, VPC, IAM)
@@ -188,6 +204,9 @@ The Makefile format is specifically designed to be:
 - `make agent-oss-run` - Run the OSS agent interactively
 - `make agent-oss-install` - Install OSS agent dependencies
 - `make agent-oss-check` - Check agent environment and dependencies
+- `make agent-langchain-run` - Run the LangChain sample agent
+- `make agent-langchain-install` - Install LangChain sample dependencies
+- `make agent-langchain-check` - Check LangChain sample environment and dependencies
 
 **Utility Commands:**
 
